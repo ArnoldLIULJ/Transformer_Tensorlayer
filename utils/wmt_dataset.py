@@ -393,12 +393,12 @@ def main(unused_argv):
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
   parser.add_argument(
-      "--data_dir", "-dd", type=str, default="/tmp/translate_ende",
+      "--data_dir", "-dd", type=str, default="./data/data",
       help="[default: %(default)s] Directory for where the "
            "translate_ende_wmt32k dataset is saved.",
       metavar="<DD>")
   parser.add_argument(
-      "--raw_dir", "-rd", type=str, default="/tmp/translate_ende_raw",
+      "--raw_dir", "-rd", type=str, default="./data/raw",
       help="[default: %(default)s] Path where the raw data will be downloaded "
            "and extracted.",
       metavar="<RD>")

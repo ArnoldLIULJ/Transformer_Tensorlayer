@@ -25,7 +25,6 @@ def get_dataset():
     dataset = tf.data.Dataset.list_files('./data/data/wmt32k-train-00001*')
     dataset = dataset.interleave(_load_records, cycle_length=2)
     dataset = dataset.map(_parse_example)
-    print(dataset)
     batch_size = 1024
     max_length = 256
 
@@ -51,8 +50,11 @@ def train_model():
         model.train()
         with tf.GradientTape() as tape:
             #print(inputs)
+
             predictions = model(inputs=inputs, targets=targets)
-            loss = loss_object(targets, predictions)
+            print(targets)
+            predictions = tf.reshape(predictions, [-1, predictions.shape[-1]])
+            loss = tl.cost.cross_entropy_seq(target_seqs=targets, logits=predictions)
 
         #print(model.transformer.weights)
         print(loss)
@@ -66,7 +68,6 @@ def train_model():
     params = model_params.EXAMPLE_PARAMS
     #model = myModel(params)
     model = Transformer(params)
-    a = model.all_layers
     # print(model.encoder_stack.weights)
     print(model.name)
     print(model.all_layers)
@@ -74,7 +75,6 @@ def train_model():
     # predictions = transformer(inputs, targets)
 
     #loss_object = tf.losses.sparse_categorical_crossentropy
-    loss_object = tf.losses.SparseCategoricalCrossentropy()
     # loss = loss_object(targets, predictions, from_logits=True)
 
     # model = tl.models.Model(inputs=[inputs, targets], outputs=[predictions, loss], name='transformer_model')
@@ -132,4 +132,4 @@ if __name__ == '__main__':
     # tf.logging.set_verbosity(tf.logging.INFO)
     test_dataset()
     # wmt_dataset.download_and_preprocess_dataset('data/raw', 'data', search=False)
-    # train_model()
+    train_model()
