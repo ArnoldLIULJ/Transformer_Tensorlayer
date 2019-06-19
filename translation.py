@@ -52,6 +52,36 @@ _EVAL_TAG = "dev"  # Following WMT and Tensor2Tensor conventions, in which the
 _TRAIN_SHARDS = 100
 _EVAL_SHARDS = 1
 
+def find_file(path, filename, max_depth=5):
+  """Returns full filepath if the file is in path or a subdirectory."""
+  for root, dirs, files in os.walk(path):
+    if filename in files:
+      return os.path.join(root, filename)
+
+    # Don't search past max_depth
+    depth = root[len(path) + 1:].count(os.sep)
+    if depth > max_depth:
+      del dirs[:]  # Clear dirs
+  return None
+
+def get_raw_existed_files(raw_dir, data_source):
+
+  raw_files = {
+      "inputs": [],
+      "targets": [],
+  }  # keys
+  for d in data_source:
+    input_file, target_file = find_files(
+        raw_dir, d["input"], d["target"])
+    raw_files["inputs"].append(input_file)
+    raw_files["targets"].append(target_file)
+  return raw_files
+
+def find_files(path, input_filename, target_filename):
+    input_file = find_file(path, input_filename)
+    target_file = find_file(path, target_filename)
+    return input_file, target_file
+
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
   parser.add_argument(
@@ -73,8 +103,8 @@ if __name__ == "__main__":
   # main(sys.argv)
   make_dir(FLAGS.raw_dir)
   make_dir(FLAGS.data_dir)
-  train_files = get_raw_files(FLAGS.raw_dir, _TRAIN_DATA_SOURCES)
-  eval_files = get_raw_files(FLAGS.raw_dir, _EVAL_DATA_SOURCES)
+  train_files = get_raw_existed_files(FLAGS.raw_dir, _TRAIN_DATA_SOURCES)
+  eval_files = get_raw_existed_files(FLAGS.raw_dir, _EVAL_DATA_SOURCES)
   train_files_flat = train_files["inputs"] + train_files["targets"]
   vocab_file = os.path.join(FLAGS.data_dir, VOCAB_FILE)
   subtokenizer = Subtokenizer.init_from_files(
