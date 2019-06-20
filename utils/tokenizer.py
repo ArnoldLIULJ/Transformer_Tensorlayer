@@ -147,7 +147,7 @@ class Subtokenizer(object):
             # items remain as np.int32. This converts both the array and its items.
             subtokens = subtokens.tolist()
 
-        if not subtokens:
+        if not subtokens.numpy().any():
             return ""
 
         assert isinstance(subtokens, list) and isinstance(subtokens[0], int), (
