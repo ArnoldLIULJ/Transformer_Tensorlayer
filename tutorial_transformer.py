@@ -1,12 +1,11 @@
 import tensorflow as tf
 import tensorlayer as tl
 import numpy as np
-from utils.wmt_dataset import *
+import argparse
 from utils.tokenizer import *
 from models import model_params
 from models.transformer import Transformer
-from utils import wmt_dataset
-
+from utils.pipeline_dataset import train_input_fn
 
 def get_dataset():
     def _parse_example(serialized_example):
@@ -24,7 +23,7 @@ def get_dataset():
         """Read file and return a dataset of tf.Examples."""
         return tf.data.TFRecordDataset(filename, buffer_size=512)
 
-    dataset = tf.data.Dataset.list_files('./data/data/wmt32k-train-00001*')
+    dataset = tf.data.Dataset.list_files('./data/data/wmt32k-train*', shuff)
     dataset = dataset.interleave(_load_records, cycle_length=2)
     dataset = dataset.map(_parse_example)
     batch_size = 1024
@@ -37,7 +36,10 @@ def get_dataset():
 
 
 
-def train_model(Subtokenizer):
+def train_model(input_params):
+    
+
+    dataset = train_input_fn(input_params)
     num_epochs = 50
     # @tf.function
     def train_step(inputs, targets):
@@ -60,11 +62,13 @@ def train_model(Subtokenizer):
 
     optimizer = tf.optimizers.Adam(learning_rate=0.001)
 
-    dataset = get_dataset()
+    
     for epoch in range(num_epochs):
         total_loss, n_iter = 0, 0
         for i, [inputs, targets] in enumerate(dataset):
             loss = train_step(inputs, targets)
+            if (i % 20 == 0):
+                print('Batch ID {} at Epoch [{}/{}]: loss {:.4f}'.format(i, epoch + 1, num_epochs, loss))
             total_loss += loss
             n_iter += 1
 
@@ -75,122 +79,18 @@ def train_model(Subtokenizer):
 
 
 
-def prepare_Subtokenizer():
-        
-        # Data sources for training/evaluating the transformer translation model.
-    # If any of the training sources are changed, then either:
-    #   1) use the flag `--search` to find the best min count or
-    #   2) update the _TRAIN_DATA_MIN_COUNT constant.
-    # min_count is the minimum number of times a token must appear in the data
-    # before it is added to the vocabulary. "Best min count" refers to the value
-    # that generates a vocabulary set that is closest in size to _TARGET_VOCAB_SIZE.
-    _TRAIN_DATA_SOURCES = [
-        {
-            "url": "http://data.statmt.org/wmt17/translation-task/"
-                "training-parallel-nc-v12.tgz",
-            "input": "news-commentary-v12.de-en.en",
-            "target": "news-commentary-v12.de-en.de",
-        },
-        {
-            "url": "http://www.statmt.org/wmt13/training-parallel-commoncrawl.tgz",
-            "input": "commoncrawl.de-en.en",
-            "target": "commoncrawl.de-en.de",
-        },
-        {
-            "url": "http://www.statmt.org/wmt13/training-parallel-europarl-v7.tgz",
-            "input": "europarl-v7.de-en.en",
-            "target": "europarl-v7.de-en.de",
-        },
-    ]
-    # Use pre-defined minimum count to generate subtoken vocabulary.
-    _TRAIN_DATA_MIN_COUNT = 6
-
-    _EVAL_DATA_SOURCES = [
-        {
-            "url": "http://data.statmt.org/wmt17/translation-task/dev.tgz",
-            "input": "newstest2013.en",
-            "target": "newstest2013.de",
-        }
-    ]
-
-    # Vocabulary constants
-    _TARGET_VOCAB_SIZE = 32768  # Number of subtokens in the vocabulary list.
-    _TARGET_THRESHOLD = 327  # Accept vocabulary if size is within this threshold
-    VOCAB_FILE = "vocab.ende.%d" % _TARGET_VOCAB_SIZE
-
-    # Strings to inclue in the generated files.
-    _PREFIX = "wmt32k"
-    _TRAIN_TAG = "train"
-    _EVAL_TAG = "dev"  # Following WMT and Tensor2Tensor conventions, in which the
-                    # evaluation datasets are tagged as "dev" for development.
-
-    # Number of files to split train and evaluation data
-    _TRAIN_SHARDS = 100
-    _EVAL_SHARDS = 1
-
-    def find_file(path, filename, max_depth=5):
-        for root, dirs, files in os.walk(path):
-            if filename in files:
-                return os.path.join(root, filename)
-
-            # Don't search past max_depth
-            depth = root[len(path) + 1:].count(os.sep)
-            if depth > max_depth:
-                del dirs[:]  # Clear dirs
-        return None
-
-    def get_raw_existed_files(raw_dir, data_source):
-        raw_files = {
-            "inputs": [],
-            "targets": [],
-        }  # keys
-        for d in data_source:
-            input_file, target_file = find_files(
-                raw_dir, d["input"], d["target"])
-            raw_files["inputs"].append(input_file)
-            raw_files["targets"].append(target_file)
-        return raw_files
-
-    def find_files(path, input_filename, target_filename):
-        input_file = find_file(path, input_filename)
-        target_file = find_file(path, target_filename)
-        return input_file, target_file
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--data_dir", "-dd", type=str, default="./data/data",
-        help="[default: %(default)s] Directory for where the "
-            "translate_ende_wmt32k dataset is saved.",
-        metavar="<DD>")
-    parser.add_argument(
-        "--raw_dir", "-rd", type=str, default="./data/raw",
-        help="[default: %(default)s] Path where the raw data will be downloaded "
-            "and extracted.",
-        metavar="<RD>")
-    parser.add_argument(
-        "--search", action="store_true",
-        help="If set, use binary search to find the vocabulary set with size"
-            "closest to the target size (%d)." % _TARGET_VOCAB_SIZE)
-
-    FLAGS, unparsed = parser.parse_known_args()
-    # main(sys.argv)
-    make_dir(FLAGS.raw_dir)
-    make_dir(FLAGS.data_dir)
-    train_files = get_raw_existed_files(FLAGS.raw_dir, _TRAIN_DATA_SOURCES)
-    eval_files = get_raw_existed_files(FLAGS.raw_dir, _EVAL_DATA_SOURCES)
-    train_files_flat = train_files["inputs"] + train_files["targets"]
-    vocab_file = os.path.join(FLAGS.data_dir, VOCAB_FILE)
-    subtokenizer = Subtokenizer.init_from_files(
-        vocab_file, train_files_flat, _TARGET_VOCAB_SIZE, _TARGET_THRESHOLD,
-        min_count=None if FLAGS.search else _TRAIN_DATA_MIN_COUNT)
-
-    return subtokenizer
 
 if __name__ == '__main__':
 
 
-
-    Subtokenizer = prepare_Subtokenizer()
-
+    params = {}
+    params["batch_size"] = 2048
+    params["max_length"] = 256
+    params["num_parallel_calls"] = 1
+    params["repeat_dataset"] = 1
+    params["static_batch"] = False
+    params["num_gpus"] = 1
+    params["use_synthetic_data"] = False
+    params["data_dir"] = './data/data/'
     # wmt_dataset.download_and_preprocess_dataset('data/raw', 'data', search=False)
-    train_model(Subtokenizer)
+    train_model(params)
