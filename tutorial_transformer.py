@@ -27,27 +27,18 @@ def get_dataset():
     dataset = tf.data.Dataset.list_files('./data/data/wmt32k-train-00001*')
     dataset = dataset.interleave(_load_records, cycle_length=2)
     dataset = dataset.map(_parse_example)
-    batch_size = 512
-    max_length = 128
+    batch_size = 1024
+    max_length = 256
 
     dataset = dataset.padded_batch(batch_size=batch_size // max_length,
                                    padded_shapes=([max_length], [max_length]),
                                    drop_remainder=True)
-    print ("=====", dataset)
     return dataset
 
 
 
-class myModel(tl.models.Model):
-    def __init__(self, params):
-        super(myModel, self).__init__()
-        self.transformer = Transformer(params)
-
-    def forward(self, inputs, targets):
-        return self.transformer(inputs=inputs, targets=targets)
-
-
 def train_model(Subtokenizer):
+    num_epochs = 50
     # @tf.function
     def train_step(inputs, targets):
         model.train()
@@ -58,33 +49,28 @@ def train_model(Subtokenizer):
             predictions = tf.reshape(predictions, [-1, predictions.shape[-1]])
             loss = tl.cost.cross_entropy_seq(target_seqs=targets, logits=predictions)
             
-
-
-        model.eval()
-        print("inputs = ", inputs.shape)
-        predictions = model(inputs=inputs)
-        print("predictions = ", predictions)
-
-
-        print(loss)
         gradients = tape.gradient(loss, model.all_weights)
         optimizer.apply_gradients(zip(gradients, model.all_weights))
-
+        return loss
 
     params = model_params.EXAMPLE_PARAMS
-    #model = myModel(params)
     model = Transformer(params)
-    # print(model.encoder_stack.weights)
     print(model.name)
     print(model.all_layers)
 
     optimizer = tf.optimizers.Adam(learning_rate=0.001)
 
     dataset = get_dataset()
-    dataset = dataset.repeat(5)
+    for epoch in range(num_epochs):
+        total_loss, n_iter = 0, 0
+        for i, [inputs, targets] in enumerate(dataset):
+            loss = train_step(inputs, targets)
+            total_loss += loss
+            n_iter += 1
 
-    for inputs, targets in dataset:
-        train_step(inputs, targets)
+        # printing average loss after every epoch
+        print('Epoch [{}/{}]: loss {:.4f}'.format(epoch + 1, num_epochs, total_loss / n_iter))
+        tl.files.save_npz(model.all_weights, name='model.npz')
 
 
 
@@ -205,7 +191,6 @@ if __name__ == '__main__':
 
 
     Subtokenizer = prepare_Subtokenizer()
-
 
     # wmt_dataset.download_and_preprocess_dataset('data/raw', 'data', search=False)
     train_model(Subtokenizer)

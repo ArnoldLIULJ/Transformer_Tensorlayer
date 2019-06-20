@@ -15,6 +15,7 @@ from models.transformer import Transformer
 from models import model_params
 from tests.utils import CustomTestCase
 from tensorlayer.cost import cross_entropy_seq
+from models.layer_attention_model import Transformer_layer
 
 
 
@@ -28,9 +29,11 @@ class Model_SEQ2SEQ_Test(CustomTestCase):
         cls.vocab_size = 20
         cls.embedding_size = 32
         cls.dec_seq_length = 5
-        cls.trainX = np.random.randint(20, size=(50, 5))
-        cls.trainY = np.random.randint(20, size=(50, 5))
+        cls.trainX = np.random.randint(low=2, high=50, size=(50, 10))
+        cls.trainY = np.random.randint(low=2, high=50, size=(50, 10))
 
+        cls.trainX[:,-1] = 1
+        cls.trainY[:,-1] = 1
         # Parameters
         cls.src_len = len(cls.trainX)
         cls.tgt_len = len(cls.trainY)
@@ -45,7 +48,7 @@ class Model_SEQ2SEQ_Test(CustomTestCase):
         pass
 
     def test_basic_simpleSeq2Seq(self):
-        model_ = Transformer(model_params.tiny_PARAMS)
+        model_ = Transformer_layer(model_params.tiny_PARAMS)
 
         optimizer = tf.optimizers.Adam(learning_rate=0.001)
         
