@@ -40,6 +40,7 @@ def train_model(input_params):
     
 
     dataset = train_input_fn(input_params)
+    print(dataset)
     num_epochs = 50
     # @tf.function
     def train_step(inputs, targets):
@@ -88,7 +89,7 @@ if __name__ == '__main__':
     params["max_length"] = 256
     params["num_parallel_calls"] = 1
     params["repeat_dataset"] = 1
-    params["static_batch"] = False
+    params["static_batch"] = True
     params["num_gpus"] = 1
     params["use_synthetic_data"] = False
     params["data_dir"] = './data/data/'
