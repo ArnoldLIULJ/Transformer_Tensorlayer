@@ -68,7 +68,6 @@ def train_model(input_params):
         total_loss, n_iter = 0, 0
         for i, [inputs, targets] in enumerate(dataset):
             loss = train_step(inputs, targets)
-            loss = 0
             if (i % 100 == 0):
                 print('Batch ID {} at Epoch [{}/{}]: loss {:.4f}'.format(i, epoch + 1, num_epochs, loss))
             total_loss += loss
