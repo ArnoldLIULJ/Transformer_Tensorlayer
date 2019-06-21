@@ -23,11 +23,11 @@ def get_dataset():
         """Read file and return a dataset of tf.Examples."""
         return tf.data.TFRecordDataset(filename, buffer_size=512)
 
-    dataset = tf.data.Dataset.list_files('./data/data/wmt32k-train*', shuff)
+    dataset = tf.data.Dataset.list_files('./data/data/wmt32k-train-00001*')
     dataset = dataset.interleave(_load_records, cycle_length=2)
     dataset = dataset.map(_parse_example)
-    batch_size = 1024
-    max_length = 256
+    batch_size = 4096
+    max_length = 4096
 
     dataset = dataset.padded_batch(batch_size=batch_size // max_length,
                                    padded_shapes=([max_length], [max_length]),
@@ -68,6 +68,7 @@ def train_model(input_params):
         total_loss, n_iter = 0, 0
         for i, [inputs, targets] in enumerate(dataset):
             loss = train_step(inputs, targets)
+            loss = 0
             if (i % 100 == 0):
                 print('Batch ID {} at Epoch [{}/{}]: loss {:.4f}'.format(i, epoch + 1, num_epochs, loss))
             total_loss += loss
@@ -89,7 +90,7 @@ if __name__ == '__main__':
     params["max_length"] = 256
     params["num_parallel_calls"] = 1
     params["repeat_dataset"] = 1
-    params["static_batch"] = True
+    params["static_batch"] = False
     params["num_gpus"] = 1
     params["use_synthetic_data"] = False
     params["data_dir"] = './data/data/wmt32k-train-00001*'
