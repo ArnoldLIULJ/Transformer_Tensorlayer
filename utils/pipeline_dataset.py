@@ -253,7 +253,7 @@ def _read_and_batch_from_files(
     # num_replicas.
     dataset = _batch_examples(dataset, batch_size, max_length)
 
-  dataset = dataset.repeat(repeat)
+  # dataset = dataset.repeat(repeat)
 
   # Prefetch the next element to improve speed of input pipeline.
   dataset = dataset.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
@@ -276,7 +276,7 @@ def _read_and_batch_from_files(
 
 def train_input_fn(params):
   """Load and return dataset of batched examples for use during training."""
-  file_pattern = os.path.join(params["data_dir"] or "", "*train*")
+  file_pattern = os.path.join(params["data_dir"],"")
   if params["use_synthetic_data"]:
     return _generate_synthetic_data(params)
   return _read_and_batch_from_files(

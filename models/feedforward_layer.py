@@ -39,6 +39,7 @@ class FeedForwardLayer(tl.layers.Layer):
         # print(inputs.shape)
         # return self.dense2(self.dropout(tf.nn.relu(self.dense1(inputs))))
         out = tf.tensordot(inputs, self.W1, axes=[[2], [0]])
+        out = tf.nn.relu(out)
         out = tf.tensordot(out, self.W2, axes=[[2], [0]])
         return out
 

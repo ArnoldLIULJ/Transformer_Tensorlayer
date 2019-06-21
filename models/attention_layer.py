@@ -73,7 +73,7 @@ class MultiHeadAttentionLayer(tl.layers.Layer):
             lambda _: tf.transpose(tf.reshape(_, (batch_size, length, self.num_heads, self.dk)), perm=(0, 2, 1, 3)),
             [k, v])  # (batch_size, num_heads, length, dk)
 
-        q *= tf.math.rsqrt(tf.cast(self.dk, dtype=tf.float32))
+        q *= tf.math.rsqrt(tf.cast(self.dk, dtype=tf.float32)) # (batch_size, num_heads, length_q, dk)
 
         logits = tf.matmul(q, k, transpose_b=True)  # (batch_size, num_heads, length_q, length_k)
         # print("logit = , mask = ", logits.shape, mask.shape)

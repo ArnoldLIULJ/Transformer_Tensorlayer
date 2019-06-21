@@ -92,6 +92,6 @@ if __name__ == '__main__':
     params["static_batch"] = True
     params["num_gpus"] = 1
     params["use_synthetic_data"] = False
-    params["data_dir"] = './data/data/'
+    params["data_dir"] = './data/data/wmt32k-train-00001*'
     # wmt_dataset.download_and_preprocess_dataset('data/raw', 'data', search=False)
     train_model(params)
