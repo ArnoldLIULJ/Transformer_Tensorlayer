@@ -130,7 +130,7 @@ class Transformer(tl.models.Model):
         length = tf.shape(inputs)[1]
         # get padding mask
         input_mask = get_input_mask(inputs)
-        target_mask = get_target_mask(length)
+        
 
         # Generate continuous representation for inputs.
         inputs = self.embedding_layer(inputs)
@@ -145,6 +145,7 @@ class Transformer(tl.models.Model):
             # shift targets to right
             targets = tf.pad(targets, [[0, 0], [1, 0], [0, 0]])[:, :-1, :]
             length = tf.shape(targets)[1]
+            target_mask = get_target_mask(length)
             # add positional_encoding
             targets += positional_encoding(length, self.params.hidden_size)
             targets = tf.nn.dropout(targets, rate=1 - self.params.keep_prob)
