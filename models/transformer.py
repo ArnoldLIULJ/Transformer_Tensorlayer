@@ -144,7 +144,7 @@ class Transformer(tl.models.Model):
             targets = self.embedding_layer(targets)
             # shift targets to right
             targets = tf.pad(targets, [[0, 0], [1, 0], [0, 0]])[:, :-1, :]
-
+            length = tf.shape(targets)[1]
             # add positional_encoding
             targets += positional_encoding(length, self.params.hidden_size)
             targets = tf.nn.dropout(targets, rate=1 - self.params.keep_prob)
