@@ -276,7 +276,7 @@ def _read_and_batch_from_files(
 
 def train_input_fn(params):
   """Load and return dataset of batched examples for use during training."""
-  file_pattern = os.path.join(params["data_dir"],"")
+  file_pattern = params["data_dir"]
   if params["use_synthetic_data"]:
     return _generate_synthetic_data(params)
   return _read_and_batch_from_files(
