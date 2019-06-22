@@ -149,9 +149,10 @@ class Subtokenizer(object):
 
         if not subtokens.numpy().any():
             return ""
-
-        assert isinstance(subtokens, list) and isinstance(subtokens[0], int), (
-            "Subtokens argument passed into decode() must be a list of integers.")
+        subtokens = list(subtokens.numpy())
+        # print(type(subtokens), type(subtokens[0]))
+        # assert isinstance(subtokens, list) and isinstance(subtokens[0], int), (
+        #     "Subtokens argument passed into decode() must be a list of integers.")
 
         return _join_tokens_to_string(self._subtoken_ids_to_tokens(subtokens))
 
