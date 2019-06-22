@@ -23,7 +23,8 @@ class EmbeddingLayer(tl.layers.Layer):
         return "embedding"
 
     def build(self, inputs_shape):
-        self.W = self._get_weights('weights', shape=(self.vocab_size, self.hidden_size))
+        self.W = self._get_weights('weights', shape=(self.vocab_size, self.hidden_size),init=tf.random_normal_initializer(
+              mean=0., stddev=self.hidden_size**-0.5))
 
     def forward(self, inputs):
         # inputs is of size (batch_size, length)
@@ -34,6 +35,7 @@ class EmbeddingLayer(tl.layers.Layer):
 
         embeddings = tf.gather(self.W, inputs)
         embeddings *= tf.expand_dims(mask, 2)
+        embeddings *= self.hidden_size ** 0.5
 
         return embeddings
     

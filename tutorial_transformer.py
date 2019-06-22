@@ -40,7 +40,7 @@ def train_model(input_params):
     
 
     dataset = train_input_fn(input_params)
-    print(dataset)
+    
     num_epochs = 50
     # @tf.function
     def train_step(inputs, targets):

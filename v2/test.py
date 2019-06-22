@@ -11,8 +11,13 @@ import tensorflow as tf
 import tensorlayer as tl
 from tqdm import tqdm
 from sklearn.utils import shuffle
-from models.transformer_v2 import Transformer
-from models import model_params
+from official.transformer.v2 import attention_layer
+from official.transformer.v2 import beam_search
+from official.transformer.v2 import embedding_layer
+from official.transformer.v2 import ffn_layer
+from official.transformer.v2 import metrics
+from official.transformer.v2.transformer import Transformer
+from official.transformer.model import model_params
 from tests.utils import CustomTestCase
 from tensorlayer.cost import cross_entropy_seq
 
@@ -47,13 +52,13 @@ class Model_SEQ2SEQ_Test(CustomTestCase):
         pass
 
     def test_basic_simpleSeq2Seq(self):
-        model_ = Transformer(model_params.tiny_PARAMS)
+        model_ = Transformer(model_params.TINY_PARAMS)
 
         optimizer = tf.optimizers.Adam(learning_rate=0.001)
         
 
         for epoch in range(self.num_epochs):
-            model_.train()
+            # model_.train()
             trainX, trainY = shuffle(self.trainX, self.trainY)
             total_loss, n_iter = 0, 0
             for X, Y in tqdm(tl.iterate.minibatches(inputs=trainX, targets=trainY, batch_size=self.batch_size,
@@ -63,24 +68,24 @@ class Model_SEQ2SEQ_Test(CustomTestCase):
 
                 with tf.GradientTape() as tape:
                     
-                    output = model_(inputs = X, targets = Y)
+                    output = model_(inputs = [X, Y], training=True)
                     output = tf.reshape(output, [-1, output.shape[-1]])
                     
 
                     loss = cross_entropy_seq(logits=output, target_seqs=Y)
 
-                    grad = tape.gradient(loss, model_.all_weights)
-                    optimizer.apply_gradients(zip(grad, model_.all_weights))
+                    grad = tape.gradient(loss, model_.trainable_weights)
+                    optimizer.apply_gradients(zip(grad, model_.trainable_weights))
 
                 total_loss += loss
                 n_iter += 1
 
-            model_.eval()
+            
             test_sample = trainX[0:2, :]
 
             top_n = 1
             for i in range(top_n):
-                prediction = model_(inputs = test_sample)
+                prediction = model_(inputs = [test_sample], training=False)
                 print("Prediction: >>>>>  ", prediction, "\n Target: >>>>>  ", trainY[0:2, :], "\n\n")
 
             # printing average loss after every epoch

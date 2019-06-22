@@ -1,7 +1,7 @@
 import tensorlayer as tl
 import tensorflow as tf
 from models import embedding_layer
-from models.attention_layer import SelfAttentionLayer, MultiHeadAttentionLayer
+from models.attention_layer_v2 import SelfAttentionLayer, MultiHeadAttentionLayer
 from models.feedforward_layer import FeedForwardLayer
 from models.model_utils import get_input_mask, get_target_mask, positional_encoding
 import models.beam_search as beam_search
@@ -76,7 +76,7 @@ class Transformer(tl.models.Model):
                 input_mask=cache.get("encoder_decoder_attention_bias"),
                 target_mask=self_attention_bias,
                 cache=cache)
-            self.decoder_stack.train()
+            
             # print("decoder_outputs = ", decoder_outputs.shape)
             logits = self.embedding_layer(decoder_outputs)
             logits = tf.squeeze(logits, axis=[1])
@@ -231,11 +231,12 @@ class SublayerWrapper(tl.models.Model):
         self.layer_norm = LayerNormalization(params.hidden_size)
 
     def forward(self, inputs, *args, **kwargs):
-        outputs = self.layer(inputs, *args, **kwargs)
+        outputs = self.layer_norm(inputs)
+        outputs = self.layer(outputs, *args, **kwargs)
         if self.is_train:
             outputs = tf.nn.dropout(outputs, rate=1 - self.params.keep_prob)
         # residual connection
-        return self.layer_norm(inputs + outputs)
+        return inputs+outputs
 
 
 
