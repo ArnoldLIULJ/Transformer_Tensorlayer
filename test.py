@@ -11,7 +11,7 @@ import tensorflow as tf
 import tensorlayer as tl
 from tqdm import tqdm
 from sklearn.utils import shuffle
-from models.transformer_v2 import Transformer
+from models.transformer import Transformer
 from models import model_params
 from tests.utils import CustomTestCase
 from tensorlayer.cost import cross_entropy_seq
@@ -25,7 +25,7 @@ class Model_SEQ2SEQ_Test(CustomTestCase):
     def setUpClass(cls):
         cls.batch_size = 16
 
-        cls.vocab_size = 20
+        cls.vocab_size = 100
         cls.embedding_size = 32
         cls.dec_seq_length = 5
         cls.trainX = np.random.randint(low=2, high=50, size=(50, 10))
@@ -50,7 +50,9 @@ class Model_SEQ2SEQ_Test(CustomTestCase):
         model_ = Transformer(model_params.tiny_PARAMS)
 
         optimizer = tf.optimizers.Adam(learning_rate=0.001)
-        
+        # print(", ".join([t.name for t in model_.trainable_weights]))
+        print(len(model_.trainable_weights), len(model_.all_weights))
+        # exit()
 
         for epoch in range(self.num_epochs):
             model_.train()

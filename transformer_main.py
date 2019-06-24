@@ -6,13 +6,13 @@ from utils.tokenizer import *
 from v2 import models_params
 from v2.transformer import Transformer
 from utils.pipeline_dataset import train_input_fn
+from utils import metrics
 
 
 
 
 def train_model(input_params):
-    
-
+    params = models_params.BASE_PARAMS
     dataset = train_input_fn(input_params)
     
     num_epochs = 50
@@ -21,15 +21,16 @@ def train_model(input_params):
         with tf.GradientTape() as tape:
             #print(inputs)
 
-            predictions = model(inputs=[inputs, targets], training=True)
-            predictions = tf.reshape(predictions, [-1, predictions.shape[-1]])
-            loss = tl.cost.cross_entropy_seq(target_seqs=targets, logits=predictions)
+            logits = model(inputs=[inputs, targets], training=True)
+            logits = metrics.MetricLayer(params["vocab_size"])([logits, targets])
+            logits, loss = metrics.LossLayer(params["vocab_size"], 0.1)([logits, targets])
+
             
         gradients = tape.gradient(loss, model.trainable_weights)
         optimizer.apply_gradients(zip(gradients, model.trainable_weights))
         return loss
 
-    params = models_params.BASE_PARAMS
+    
     model = Transformer(params)
 
 
@@ -65,6 +66,6 @@ if __name__ == '__main__':
     params["static_batch"] = False
     params["num_gpus"] = 1
     params["use_synthetic_data"] = False
-    params["data_dir"] = './data/data/wmt32k-train*'
+    params["data_dir"] = './data/data/wmt32k-train-00001*'
     # wmt_dataset.download_and_preprocess_dataset('data/raw', 'data', search=False)
     train_model(params)

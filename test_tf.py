@@ -15,6 +15,7 @@ from v2.transformer import Transformer
 from v2 import models_params
 from tests.utils import CustomTestCase
 from tensorlayer.cost import cross_entropy_seq
+from utils import metrics
 
 
 
@@ -25,9 +26,7 @@ class Model_SEQ2SEQ_Test(CustomTestCase):
     def setUpClass(cls):
         cls.batch_size = 16
 
-        cls.vocab_size = 20
         cls.embedding_size = 32
-        cls.dec_seq_length = 5
         cls.trainX = np.random.randint(low=2, high=50, size=(50, 10))
         cls.trainY = np.random.randint(low=2, high=50, size=(50, 10))
 
@@ -48,6 +47,7 @@ class Model_SEQ2SEQ_Test(CustomTestCase):
 
     def test_basic_simpleSeq2Seq(self):
         model_ = Transformer(models_params.TINY_PARAMS)
+        self.vocab_size = models_params.TINY_PARAMS["vocab_size"]
 
         optimizer = tf.optimizers.Adam(learning_rate=0.001)
         
@@ -61,12 +61,17 @@ class Model_SEQ2SEQ_Test(CustomTestCase):
 
 
                 with tf.GradientTape() as tape:
-                    
+                    targets = Y
                     output = model_(inputs = [X, Y], training=True)
-                    output = tf.reshape(output, [-1, output.shape[-1]])
+                    # print(logits.shape, Y.shape)
+                    logits = metrics.MetricLayer(self.vocab_size)([output, targets])
+                    logits, loss = metrics.LossLayer(self.vocab_size, 0.1)([logits, targets])
+                    # logits = tf.keras.layers.Lambda(lambda x: x, name="logits")(logits)
                     
+                    # output = tf.reshape(output, [-1, output.shape[-1]])
+                    # print(", ".join([t.name for t in model_.trainable_weights]))
 
-                    loss = cross_entropy_seq(logits=output, target_seqs=Y)
+                    # loss = cross_entropy_seq(logits=output, target_seqs=Y)
 
                     grad = tape.gradient(loss, model_.trainable_weights)
                     optimizer.apply_gradients(zip(grad, model_.trainable_weights))
@@ -79,7 +84,7 @@ class Model_SEQ2SEQ_Test(CustomTestCase):
             top_n = 1
             for i in range(top_n):
                 prediction = model_(inputs = [test_sample], training=False)
-                print("Prediction: >>>>>  ", prediction, "\n Target: >>>>>  ", trainY[0:2, :], "\n\n")
+                print("Prediction: >>>>>  ", prediction["outputs"], "\n Target: >>>>>  ", trainY[0:2, :], "\n\n")
 
             # printing average loss after every epoch
             print('Epoch [{}/{}]: loss {:.4f}'.format(epoch + 1, self.num_epochs, total_loss / n_iter))
