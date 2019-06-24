@@ -1,7 +1,7 @@
 import tensorlayer as tl
 import tensorflow as tf
 from models import embedding_layer
-from models.attention_layer_v2 import SelfAttentionLayer, MultiHeadAttentionLayer
+from models.attention_layer import SelfAttentionLayer, MultiHeadAttentionLayer
 from models.feedforward_layer import FeedForwardLayer
 from models.model_utils import get_input_mask, get_target_mask, positional_encoding
 import models.beam_search as beam_search

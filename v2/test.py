@@ -30,7 +30,7 @@ class Model_SEQ2SEQ_Test(CustomTestCase):
     def setUpClass(cls):
         cls.batch_size = 16
 
-        cls.vocab_size = 20
+        cls.vocab_size = 50
         cls.embedding_size = 32
         cls.dec_seq_length = 5
         cls.trainX = np.random.randint(low=2, high=50, size=(50, 10))
@@ -73,7 +73,6 @@ class Model_SEQ2SEQ_Test(CustomTestCase):
                     
 
                     loss = cross_entropy_seq(logits=output, target_seqs=Y)
-
                     grad = tape.gradient(loss, model_.trainable_weights)
                     optimizer.apply_gradients(zip(grad, model_.trainable_weights))
 

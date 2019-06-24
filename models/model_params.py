@@ -18,7 +18,7 @@ class EXAMPLE_PARAMS(object):
 
 
 class tiny_PARAMS(object):
-    vocab_size = 100
+    vocab_size = 50
 
     encoder_num_layers = 2
     decoder_num_layers = 2

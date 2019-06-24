@@ -91,7 +91,7 @@ TINY_PARAMS.update(
     default_batch_size=1024,
     default_batch_size_tpu=1024,
     num_hidden_layers=2,
-    vocab_size = 100,
+    vocab_size = 50,
     hidden_size=64,
     num_heads=4,
     filter_size=16,
