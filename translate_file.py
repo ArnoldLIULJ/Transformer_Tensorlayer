@@ -81,7 +81,7 @@ def _trim_and_decode(ids, subtokenizer):
     index = list(ids.numpy()).index(tokenizer.EOS_ID)
     return subtokenizer.decode(ids[:index])
   except ValueError: 
-    print("mother fucker") # No EOS found in sequence
+    # print("mother fucker") # No EOS found in sequence
     return subtokenizer.decode(ids)
 
 
