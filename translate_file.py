@@ -147,5 +147,5 @@ if __name__ == "__main__":
   model = Transformer(params)
   model.load_weights('./checkpoints/my_checkpoint')
   input_file = "README.md"
-  translate_file(model, subtokenizer, input_file, output_file="out.de")
+  translate_file(model, subtokenizer, input_file, output_file="./output/out.de")
     
