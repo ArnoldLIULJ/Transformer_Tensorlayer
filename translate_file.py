@@ -127,7 +127,6 @@ def translate_file(
   for i, text in enumerate(input_fn()):
     prediction = model(inputs=[text], training=False)
     for i, single in enumerate(prediction["outputs"]):
-        print(single)
         translation = _trim_and_decode(single, subtokenizer)
         translations.append(translation)
 
