@@ -118,12 +118,6 @@ class Transformer(tl.models.Model):
     embedded_inputs = self.embedding_softmax_layer(inputs)
     inputs_padding = get_input_mask(inputs)
 
-    # input_mask = get_input_mask(inputs)
-    # length = tf.shape(inputs)[1]
-    # inputs = self.embedding_softmax_layer(inputs)
-    # inputs += positional_encoding(length, self.params.hidden_size)
-    # inputs = tf.nn.dropout(inputs, rate=1 - self.params.keep_prob)
-    # features = self.encoder_stack(inputs, input_mask=input_mask)
 
     encoder_outputs = self.encode(inputs, inputs_padding)
     # Generate output sequence if targets is None, or return logits if target
@@ -376,6 +370,8 @@ class EncoderStack(tl.models.Model):
           params.keep_prob)
       feed_forward_network = FeedForwardLayer(
           params.hidden_size, params.ff_size, params.keep_prob)
+      # layer_attention_layer = MultiHeadAttentionLayer(
+      #   params.num_heads, params.hidden_size, params.keep_prob)
 
       self.layers.append([
           PrePostProcessingWrapper(self_attention_layer, params),
@@ -415,6 +411,8 @@ class EncoderStack(tl.models.Model):
         with tf.name_scope("self_attention"):
           encoder_inputs = self_attention_layer(
               encoder_inputs, mask=input_mask)
+        # with tf.name_scope("layer_attention"):
+        #   encoder_inputs = (inputs, y=encoder_inputs, mask=input_mask)
         with tf.name_scope("ffn"):
           encoder_inputs = feed_forward_network(
               encoder_inputs)

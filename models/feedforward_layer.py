@@ -34,15 +34,16 @@ class FeedForwardLayer(tl.layers.Layer):
         # self.dropout = tl.layers.Dropout(self.keep_prob)
         self.W1 = self._get_weights('W1', (self.hidden_size, self.ff_size))
         self.W2 = self._get_weights('W2', (self.ff_size, self.hidden_size))
-
+        self.bias1 = self._get_weights('Bias1', (1,1,self.ff_size))
+        self.bias2 = self._get_weights('Bias2', (1,1,self.hidden_size))
     def forward(self, inputs):
         # print(inputs.shape)
         # return self.dense2(self.dropout(tf.nn.relu(self.dense1(inputs))))
-        out = tf.tensordot(inputs, self.W1, axes=[[2], [0]])
+        out = tf.tensordot(inputs, self.W1, axes=[[2], [0]])+self.bias1
         out = tf.nn.relu(out)
         if self.is_train:
             out = tf.nn.dropout(out, rate=1-self.keep_prob)
-        out = tf.tensordot(out, self.W2, axes=[[2], [0]])
+        out = tf.tensordot(out, self.W2, axes=[[2], [0]])+self.bias2
         return out
 
     def __repr__(self):

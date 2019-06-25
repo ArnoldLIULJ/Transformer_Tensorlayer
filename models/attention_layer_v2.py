@@ -43,14 +43,14 @@ class MultiHeadAttentionLayer(tl.models.Model):
     self.num_heads = num_heads
     self.attention_dropout = 1-keep_pro
     # Layers for linearly projecting the queries, keys, and values.
-    self.q_dense_layer = tf.keras.layers.Dense(
-        self.hidden_size, use_bias=False, name="q")
-    self.k_dense_layer = tf.keras.layers.Dense(
-        self.hidden_size, use_bias=False, name="k")
-    self.v_dense_layer = tf.keras.layers.Dense(
-        self.hidden_size, use_bias=False, name="v")
-    self.output_dense_layer = tf.keras.layers.Dense(
-        self.hidden_size, use_bias=False, name="output_transform")
+    self.q_dense_layer = tl.layers.Dense(
+      self.hidden_size, in_channels=self.hidden_size, name="q")
+    self.k_dense_layer = tl.layers.Dense(
+      self.hidden_size, in_channels=self.hidden_size, name="k")
+    self.v_dense_layer = tl.layers.Dense(
+      self.hidden_size, in_channels=self.hidden_size, name="v")
+    self.output_dense_layer = tl.layers.Dense(
+      self.hidden_size, in_channels=self.hidden_size, name="output_transform")
     
 
   def get_config(self):
@@ -122,10 +122,15 @@ class MultiHeadAttentionLayer(tl.models.Model):
     # multiple heads. Multi-head attention uses multiple queries, keys, and
     # values rather than regular attention (which uses a single q, k, v).
     bias = mask
-
+    Batch_size = x.shape[0]
+    x = tf.reshape(x, [-1, x.shape[-1]])
+    y = tf.reshape(y, [-1, y.shape[-1]])
     q = self.q_dense_layer(x)
     k = self.k_dense_layer(y)
     v = self.v_dense_layer(y)
+    q = tf.reshape(q, [Batch_size, -1, q.shape[-1]])
+    k = tf.reshape(k, [Batch_size, -1, k.shape[-1]])
+    v = tf.reshape(v, [Batch_size, -1, v.shape[-1]])
 
     if cache is not None:
       
@@ -160,7 +165,9 @@ class MultiHeadAttentionLayer(tl.models.Model):
     attention_output = self.combine_heads(attention_output)
 
     # Run the combined outputs through another linear projection layer.
+    attention_output = tf.reshape(attention_output, [-1, attention_output.shape[-1]])
     attention_output = self.output_dense_layer(attention_output)
+    attention_output = tf.reshape(attention_output, [Batch_size, -1, attention_output.shape[-1]])
     return attention_output
 
 
