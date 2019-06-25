@@ -13,7 +13,10 @@ from utils import metrics
 
 def train_model(input_params):
     params = models_params.BASE_PARAMS
+
+    
     dataset = train_input_fn(input_params)
+
     
     num_epochs = 50
     # @tf.function
@@ -32,7 +35,7 @@ def train_model(input_params):
 
     
     model = Transformer(params)
-
+    model.load_weights('./checkpoints/my_checkpoint')
 
 
     optimizer = tf.optimizers.Adam(learning_rate=0.001)

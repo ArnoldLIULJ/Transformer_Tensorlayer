@@ -11,8 +11,8 @@ import tensorflow as tf
 import tensorlayer as tl
 from tqdm import tqdm
 from sklearn.utils import shuffle
-# from models.transformer_v2 import Transformer
-from models.layer_attention_model import Transformer_layer as Transformer
+from models.transformer_v2 import Transformer
+# from models.layer_attention_model import Transformer_layer as Transformer
 from models import model_params
 from tests.utils import CustomTestCase
 from utils import metrics
@@ -30,7 +30,7 @@ class Model_SEQ2SEQ_Test(CustomTestCase):
         cls.embedding_size = 32
         cls.dec_seq_length = 5
         cls.trainX = np.random.randint(low=2, high=50, size=(50, 10))
-        cls.trainY = np.random.randint(low=2, high=50, size=(50, 10))
+        cls.trainY = np.random.randint(low=2, high=50, size=(50, 11))
 
         cls.trainX[:,-1] = 1
         cls.trainY[:,-1] = 1
@@ -48,8 +48,8 @@ class Model_SEQ2SEQ_Test(CustomTestCase):
         pass
 
     def test_basic_simpleSeq2Seq(self):
-        model_ = Transformer(model_params.tiny_PARAMS)
-        self.vocab_size = model_params.tiny_PARAMS.vocab_size
+        model_ = Transformer(model_params.TINY_PARAMS)
+        self.vocab_size = model_params.TINY_PARAMS.vocab_size
         optimizer = tf.optimizers.Adam(learning_rate=0.001)
 
         # layer_normalization_print = [x for x in [t.name for t in model_.trainable_weights] if "feedforwardlayer" in x ]
