@@ -37,8 +37,8 @@ def train_model(input_params):
     model = Transformer(params)
     model.load_weights('./checkpoints/my_checkpoint')
 
-
     optimizer = tf.optimizers.Adam(learning_rate=0.001)
+
     
     
     for epoch in range(num_epochs):
@@ -47,12 +47,15 @@ def train_model(input_params):
             loss = train_step(inputs, targets)
             if (i % 100 == 0):
                 print('Batch ID {} at Epoch [{}/{}]: loss {:.4f}'.format(i, epoch + 1, num_epochs, loss))
+            if (i % 10000 == 0):
+                model.save_weights('./checkpoints/my_checkpoint')
             total_loss += loss
             n_iter += 1
 
         # printing average loss after every epoch
         print('Epoch [{}/{}]: loss {:.4f}'.format(epoch + 1, num_epochs, total_loss / n_iter))
         model.save_weights('./checkpoints/my_checkpoint')
+        
 
 
 
