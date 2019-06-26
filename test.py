@@ -12,8 +12,9 @@ import tensorlayer as tl
 from tqdm import tqdm
 from sklearn.utils import shuffle
 from models.transformer_v2 import Transformer
-# from models.layer_attention_model import Transformer_layer as Transformer
-from models import model_params
+# from weightLightModels.transformer import Transformer
+from weightLightModels.models_params import TINY_PARAMS
+# from models import model_params
 from tests.utils import CustomTestCase
 from utils import metrics
 from tensorlayer.cost import cross_entropy_seq
@@ -48,12 +49,12 @@ class Model_SEQ2SEQ_Test(CustomTestCase):
         pass
 
     def test_basic_simpleSeq2Seq(self):
-        model_ = Transformer(model_params.TINY_PARAMS)
-        self.vocab_size = model_params.TINY_PARAMS.vocab_size
+        model_ = Transformer(TINY_PARAMS)
+        self.vocab_size = TINY_PARAMS.vocab_size
         optimizer = tf.optimizers.Adam(learning_rate=0.001)
-
+        # print(model_.trainable_weights)
         # layer_normalization_print = [x for x in [t.name for t in model_.trainable_weights] if "feedforwardlayer" in x ]
-        # print(", ".join([t.name for t in model_.trainable_weights]))
+        # print(", ".join([str(id(t.name)) for t in model_.trainable_weights if "depth" in t.name]))
         # print(", ".join(layer_normalization_print))
         # print("number of layers :  ", len(model_.trainable_weights))
         # exit()
@@ -62,6 +63,7 @@ class Model_SEQ2SEQ_Test(CustomTestCase):
             model_.train()
             trainX, trainY = shuffle(self.trainX, self.trainY)
             total_loss, n_iter = 0, 0
+            print()
             for X, Y in tqdm(tl.iterate.minibatches(inputs=trainX, targets=trainY, batch_size=self.batch_size,
                                                     shuffle=False), total=self.n_step,
                              desc='Epoch[{}/{}]'.format(epoch + 1, self.num_epochs), leave=False):
@@ -71,7 +73,7 @@ class Model_SEQ2SEQ_Test(CustomTestCase):
                     start = time.time()
                     targets = Y
                     logits = model_(inputs = X, targets = Y)
-
+                    # print(", ".join([str(id(t.name)) for t in model_.trainable_weights if "depth" in t.name]))
                     # output = tf.reshape(output, [-1, output.shape[-1]])
                     logits = metrics.MetricLayer(self.vocab_size)([logits, targets])
                     logits, loss = metrics.LossLayer(self.vocab_size, 0.1)([logits, targets])
@@ -88,10 +90,10 @@ class Model_SEQ2SEQ_Test(CustomTestCase):
             model_.eval()
             test_sample = trainX[0:2, :]
 
-            # top_n = 1
-            # for i in range(top_n):
-            #     prediction = model_(inputs = test_sample)
-            #     print("Prediction: >>>>>  ", prediction["outputs"], "\n Target: >>>>>  ", trainY[0:2, :], "\n\n")
+            top_n = 1
+            for i in range(top_n):
+                prediction = model_(inputs = test_sample)
+                print("Prediction: >>>>>  ", prediction["outputs"], "\n Target: >>>>>  ", trainY[0:2, :], "\n\n")
 
             # printing average loss after every epoch
             print('Epoch [{}/{}]: loss {:.4f}'.format(epoch + 1, self.num_epochs, total_loss / n_iter))

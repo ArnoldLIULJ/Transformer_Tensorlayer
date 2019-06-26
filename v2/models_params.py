@@ -95,4 +95,8 @@ TINY_PARAMS.update(
     hidden_size=64,
     num_heads=4,
     filter_size=16,
+    # Default prediction params
+    extra_decode_length=5,
+    beam_size=2,
+    alpha=0.6 # used to calculate length normalization in beam search
 )

@@ -9,15 +9,14 @@ class EXAMPLE_PARAMS(object):
     num_heads = 8
     keep_prob = 0.9
 
-
-
     # Default prediction params
     extra_decode_length=50
     beam_size=4
     alpha=0.6 # used to calculate length normalization in beam search
 
 
-class tiny_PARAMS(object):
+
+class TINY_PARAMS(object):
     vocab_size = 50
 
     encoder_num_layers = 2

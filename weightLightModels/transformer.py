@@ -25,6 +25,7 @@ import tensorflow as tf
 import tensorlayer as tl
 from models import embedding_layer_v2 as embedding_layer
 from models.attention_layer_v2 import SelfAttentionLayer, MultiHeadAttentionLayer
+from weightLightModels.LightWeightConvolution import LightConv
 from models.feedforward_layer_v2 import FeedForwardNetwork as FeedForwardLayer
 from models.model_utils_v2 import get_position_encoding as positional_encoding
 from models.model_utils_v2 import get_decoder_self_attention_bias as get_target_mask
@@ -344,9 +345,7 @@ class EncoderStack(tl.models.Model):
     self.layers = []
     for _ in range(params.encoder_num_layers):
       # Create sublayers for each layer.
-      self_attention_layer = SelfAttentionLayer(
-          params.num_heads, params.hidden_size, 
-          params.keep_prob)
+      self_attention_layer = LightConv(params)
       feed_forward_network = FeedForwardLayer(
           params.hidden_size, params.ff_size, params.keep_prob)
       # layer_attention_layer = MultiHeadAttentionLayer(
@@ -389,7 +388,7 @@ class EncoderStack(tl.models.Model):
       with tf.name_scope("layer_%d" % n):
         with tf.name_scope("self_attention"):
           encoder_inputs = self_attention_layer(
-              encoder_inputs, mask=input_mask)
+              encoder_inputs)
         # with tf.name_scope("layer_attention"):
         #   encoder_inputs = (inputs, y=encoder_inputs, mask=input_mask)
         with tf.name_scope("ffn"):

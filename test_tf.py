@@ -86,10 +86,10 @@ class Model_SEQ2SEQ_Test(CustomTestCase):
             
             test_sample = trainX[0:2, :]
 
-            # top_n = 1
-            # for i in range(top_n):
-            #     prediction = model_(inputs = [test_sample], training=False)
-            #     print("Prediction: >>>>>  ", prediction["outputs"], "\n Target: >>>>>  ", trainY[0:2, :], "\n\n")
+            top_n = 1
+            for i in range(top_n):
+                prediction = model_(inputs = [test_sample], training=False)
+                print("Prediction: >>>>>  ", prediction["outputs"], "\n Target: >>>>>  ", trainY[0:2, :], "\n\n")
 
             # printing average loss after every epoch
             print('Epoch [{}/{}]: loss {:.4f}'.format(epoch + 1, self.num_epochs, total_loss / n_iter))
