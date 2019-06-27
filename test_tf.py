@@ -12,13 +12,27 @@ import tensorlayer as tl
 from tqdm import tqdm
 from sklearn.utils import shuffle
 from v2.transformer import Transformer
-from v2 import models_params
+from v2.models_params import TINY_PARAMS as params
 from tests.utils import CustomTestCase
 from tensorlayer.cost import cross_entropy_seq
 from utils import metrics
+from models import optimizer
 import time
 
+class CustomSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
+  def __init__(self, d_model, warmup_steps=5):
+    super(CustomSchedule, self).__init__()
+    
+    self.d_model = d_model
+    self.d_model = tf.cast(self.d_model, tf.float32)
 
+    self.warmup_steps = warmup_steps
+    
+  def __call__(self, step):
+    arg1 = tf.math.rsqrt(step)
+    arg2 = step * (self.warmup_steps ** -1.5)
+    
+    return tf.math.rsqrt(self.d_model) * tf.math.minimum(arg1, arg2)
 
 
 class Model_SEQ2SEQ_Test(CustomTestCase):
@@ -47,10 +61,19 @@ class Model_SEQ2SEQ_Test(CustomTestCase):
         pass
 
     def test_basic_simpleSeq2Seq(self):
-        model_ = Transformer(models_params.TINY_PARAMS)
-        self.vocab_size = models_params.TINY_PARAMS["vocab_size"]
+        model_ = Transformer(params)
+        self.vocab_size = params["vocab_size"]
 
-        optimizer = tf.optimizers.Adam(learning_rate=0.001)
+        # optimizer_ = optimizer.LazyAdam(
+        #     params["learning_rate"],
+        #     params["optimizer_adam_beta1"],
+        #     params["optimizer_adam_beta2"],
+        #     epsilon=params["optimizer_adam_epsilon"])
+
+        learning_rate = CustomSchedule(params["hidden_size"])
+        optimizer_ = tf.optimizers.Adam(learning_rate=0.01)
+        optimizer_ = tf.keras.optimizers.Adam(learning_rate, beta_1=0.9, beta_2=0.98, 
+                                     epsilon=1e-9)
         
 
         for epoch in range(self.num_epochs):
@@ -79,7 +102,7 @@ class Model_SEQ2SEQ_Test(CustomTestCase):
                     # loss = cross_entropy_seq(logits=output, target_seqs=Y)
 
                     grad = tape.gradient(loss, model_.trainable_weights)
-                    optimizer.apply_gradients(zip(grad, model_.trainable_weights))
+                    optimizer_.apply_gradients(zip(grad, model_.trainable_weights))
                     # print(time.time()-start)
                 total_loss += loss
                 n_iter += 1

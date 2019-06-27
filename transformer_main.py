@@ -37,7 +37,7 @@ def train_model(input_params):
     model = Transformer(params)
     model.load_weights('./checkpoints/my_checkpoint')
 
-    optimizer = tf.optimizers.Adam(learning_rate=0.001)
+    optimizer = tf.optimizers.Adam(learning_rate=0.01)
 
     
     

@@ -18,6 +18,7 @@ from weightLightModels.models_params import TINY_PARAMS
 from tests.utils import CustomTestCase
 from utils import metrics
 from tensorlayer.cost import cross_entropy_seq
+from models import optimizer
 import time
 
 
@@ -52,6 +53,11 @@ class Model_SEQ2SEQ_Test(CustomTestCase):
         model_ = Transformer(TINY_PARAMS)
         self.vocab_size = TINY_PARAMS.vocab_size
         optimizer = tf.optimizers.Adam(learning_rate=0.001)
+        optimizer = optimizer.LazyAdam(
+            params["learning_rate"],
+            params["optimizer_adam_beta1"],
+            params["optimizer_adam_beta2"],
+            epsilon=params["optimizer_adam_epsilon"])
         # print(model_.trainable_weights)
         # layer_normalization_print = [x for x in [t.name for t in model_.trainable_weights] if "feedforwardlayer" in x ]
         # print(", ".join([str(id(t.name)) for t in model_.trainable_weights if "depth" in t.name]))
