@@ -9,7 +9,20 @@ from utils.pipeline_dataset import train_input_fn
 from utils import metrics
 
 
+class CustomSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
+  def __init__(self, d_model, warmup_steps=5):
+    super(CustomSchedule, self).__init__()
+    
+    self.d_model = d_model
+    self.d_model = tf.cast(self.d_model, tf.float32)
 
+    self.warmup_steps = warmup_steps
+    
+  def __call__(self, step):
+    arg1 = tf.math.rsqrt(step)
+    arg2 = step * (self.warmup_steps ** -1.5)
+    
+    return tf.math.rsqrt(self.d_model) * tf.math.minimum(arg1, arg2)
 
 def train_model(input_params):
     params = models_params.BASE_PARAMS
@@ -37,7 +50,10 @@ def train_model(input_params):
     model = Transformer(params)
     model.load_weights('./checkpoints/my_checkpoint')
 
-    optimizer = tf.optimizers.Adam(learning_rate=0.01)
+    learning_rate = CustomSchedule(params["hidden_size"])
+    # optimizer = tf.optimizers.Adam(learning_rate=0.001)
+    optimizer = tf.keras.optimizers.Adam(learning_rate, beta_1=0.9, beta_2=0.98, 
+                                    epsilon=1e-9)
 
     
     
@@ -47,7 +63,7 @@ def train_model(input_params):
             loss = train_step(inputs, targets)
             if (i % 100 == 0):
                 print('Batch ID {} at Epoch [{}/{}]: loss {:.4f}'.format(i, epoch + 1, num_epochs, loss))
-            if (i % 10000 == 0):
+            if ((i+1) % 10000 == 0):
                 model.save_weights('./checkpoints/my_checkpoint')
             total_loss += loss
             n_iter += 1
