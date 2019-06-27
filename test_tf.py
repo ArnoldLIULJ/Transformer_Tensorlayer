@@ -74,6 +74,8 @@ class Model_SEQ2SEQ_Test(CustomTestCase):
         optimizer_ = tf.optimizers.Adam(learning_rate=0.01)
         optimizer_ = tf.keras.optimizers.Adam(learning_rate, beta_1=0.9, beta_2=0.98, 
                                      epsilon=1e-9)
+        optimizer_ = optimizer.LazyAdam(learning_rate, beta_1=0.9, beta_2=0.98, 
+                                     epsilon=1e-9)
         
 
         for epoch in range(self.num_epochs):

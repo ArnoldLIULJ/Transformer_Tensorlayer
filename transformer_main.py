@@ -7,6 +7,7 @@ from v2 import models_params
 from v2.transformer import Transformer
 from utils.pipeline_dataset import train_input_fn
 from utils import metrics
+from models import optimizer
 
 
 class CustomSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
@@ -43,17 +44,17 @@ def train_model(input_params):
 
             
         gradients = tape.gradient(loss, model.trainable_weights)
-        optimizer.apply_gradients(zip(gradients, model.trainable_weights))
+        optimizer_.apply_gradients(zip(gradients, model.trainable_weights))
         return loss
 
     
     model = Transformer(params)
     model.load_weights('./checkpoints/my_checkpoint')
 
-    learning_rate = CustomSchedule(params["hidden_size"])
+    learning_rate = CustomSchedule(params["hidden_size"], warmup_steps=params["learning_rate_warmup_steps"])
     # optimizer = tf.optimizers.Adam(learning_rate=0.001)
-    optimizer = tf.keras.optimizers.Adam(learning_rate, beta_1=0.9, beta_2=0.98, 
-                                    epsilon=1e-9)
+    optimizer_ = optimizer.LazyAdam(learning_rate, beta_1=0.9, beta_2=0.98, 
+                                     epsilon=1e-9)
 
     
     
