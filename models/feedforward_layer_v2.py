@@ -37,13 +37,11 @@ class FeedForwardNetwork(tl.models.Model):
     self.hidden_size = hidden_size
     self.filter_size = filter_size
     self.relu_dropout = relu_dropout
-    self.filter_dense_layer = tf.keras.layers.Dense(
-        self.filter_size,
-        use_bias=True,
-        activation=tf.nn.relu,
-        name="filter_layer")
-    self.output_dense_layer = tf.keras.layers.Dense(
-        self.hidden_size, use_bias=True, name="output_layer")
+    self.filter_dense_layer = tl.layers.Dense(
+      self.filter_size, in_channels=self.hidden_size, W_init=tf.keras.initializers.get('glorot_uniform'), name="input_layer")
+    self.output_dense_layer = tl.layers.Dense(
+      self.hidden_size, in_channels=self.filter_size, W_init=tf.keras.initializers.get('glorot_uniform'), name="output_layer")
+
 
   def get_config(self):
     return {
@@ -67,10 +65,13 @@ class FeedForwardNetwork(tl.models.Model):
     x = inputs
     batch_size = tf.shape(x)[0]
     length = tf.shape(x)[1]
-
+    x = tf.reshape(x, [-1, x.shape[-1]])
     output = self.filter_dense_layer(x)
+    output = tf.reshape(output, [batch_size, -1, output.shape[-1]])
     if self.is_train:
       output = tf.nn.dropout(output, rate=self.relu_dropout)
+    output = tf.reshape(output, [-1, output.shape[-1]])
     output = self.output_dense_layer(output)
+    output = tf.reshape(output, [batch_size, -1, output.shape[-1]])
 
     return output

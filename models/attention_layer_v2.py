@@ -44,13 +44,13 @@ class MultiHeadAttentionLayer(tl.models.Model):
     self.attention_dropout = 1-keep_pro
     # Layers for linearly projecting the queries, keys, and values.
     self.q_dense_layer = tl.layers.Dense(
-      self.hidden_size, in_channels=self.hidden_size, name="q")
+      self.hidden_size, in_channels=self.hidden_size, W_init=tf.keras.initializers.get('glorot_uniform'), name="q")
     self.k_dense_layer = tl.layers.Dense(
-      self.hidden_size, in_channels=self.hidden_size, name="k")
+      self.hidden_size, in_channels=self.hidden_size, W_init=tf.keras.initializers.get('glorot_uniform'), name="k")
     self.v_dense_layer = tl.layers.Dense(
-      self.hidden_size, in_channels=self.hidden_size, name="v")
+      self.hidden_size, in_channels=self.hidden_size, W_init=tf.keras.initializers.get('glorot_uniform'), name="v")
     self.output_dense_layer = tl.layers.Dense(
-      self.hidden_size, in_channels=self.hidden_size, name="output_transform")
+      self.hidden_size, in_channels=self.hidden_size, W_init=tf.keras.initializers.get('glorot_uniform'), name="output_transform")
     
 
   def get_config(self):
