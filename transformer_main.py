@@ -64,7 +64,7 @@ def train_model(input_params):
             loss = train_step(inputs, targets)
             if (i % 100 == 0):
                 print('Batch ID {} at Epoch [{}/{}]: loss {:.4f}'.format(i, epoch + 1, num_epochs, loss))
-            if ((i+1) % 10000 == 0):
+            if ((i+1) % 3000 == 0):
                 model.save_weights('./checkpoints/my_checkpoint')
             total_loss += loss
             n_iter += 1

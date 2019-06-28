@@ -72,10 +72,10 @@ class Model_SEQ2SEQ_Test(CustomTestCase):
 
         learning_rate = CustomSchedule(params["hidden_size"])
         optimizer_ = tf.optimizers.Adam(learning_rate=0.01)
-        optimizer_ = tf.keras.optimizers.Adam(learning_rate, beta_1=0.9, beta_2=0.98, 
-                                     epsilon=1e-9)
-        optimizer_ = optimizer.LazyAdam(learning_rate, beta_1=0.9, beta_2=0.98, 
-                                     epsilon=1e-9)
+        # optimizer_ = tf.keras.optimizers.Adam(learning_rate, beta_1=0.9, beta_2=0.98, 
+        #                              epsilon=1e-9)
+        # optimizer_ = optimizer.LazyAdam(learning_rate, beta_1=0.9, beta_2=0.98, 
+        #                              epsilon=1e-9)
         
 
         for epoch in range(self.num_epochs):
@@ -111,10 +111,10 @@ class Model_SEQ2SEQ_Test(CustomTestCase):
             
             test_sample = trainX[0:2, :]
 
-            top_n = 1
-            for i in range(top_n):
-                prediction = model_(inputs = [test_sample], training=False)
-                print("Prediction: >>>>>  ", prediction["outputs"], "\n Target: >>>>>  ", trainY[0:2, :], "\n\n")
+            # top_n = 1
+            # for i in range(top_n):
+            #     prediction = model_(inputs = [test_sample], training=False)
+            #     print("Prediction: >>>>>  ", prediction["outputs"], "\n Target: >>>>>  ", trainY[0:2, :], "\n\n")
 
             # printing average loss after every epoch
             print('Epoch [{}/{}]: loss {:.4f}'.format(epoch + 1, self.num_epochs, total_loss / n_iter))
