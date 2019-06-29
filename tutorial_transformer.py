@@ -76,21 +76,25 @@ def train_model(input_params):
             if (i % 100 == 0):
                 print('Batch ID {} at Epoch [{}/{}]: loss {:.4f}'.format(i, epoch + 1, num_epochs, loss))
             if (i % 2000 == 0):
-                tl.files.save_npz(model.all_weights, name='./checkouts_tl/model.npz')
-            if (i % 1 == 0):
-                translate_file(model, subtokenizer, input_file=input_file, output_file=output_file)
-                insensitive_score = bleu_wrapper(ref_filename, output_file, False)
-                sensitive_score = bleu_wrapper(ref_filename, output_file, True)
-                with tf.io.gfile.GFile(trace_path+"bleu_insensitive", "ab+") as trace_file:
-                    trace_file.write(str(insensitive_score)+'\n')
-                with tf.io.gfile.GFile(trace_path+"bleu_sensitive", "ab+") as trace_file:
-                    trace_file.write(str(sensitive_score)+'\n')            
+                tl.files.save_npz(model.all_weights, name='./checkpoints_tl/model.npz')
+            
+         
             total_loss += loss
             n_iter += 1
 
         # printing average loss after every epoch
         print('Epoch [{}/{}]: loss {:.4f}'.format(epoch + 1, num_epochs, total_loss / n_iter))
-        tl.files.save_npz(model.all_weights, name='./checkouts_tl/model.npz')
+        # save model weights after every epoch
+        tl.files.save_npz(model.all_weights, name='./checkpoints_tl/model.npz')
+
+        # translate the evaluation file and calculate bleu scores
+        translate_file(model, subtokenizer, input_file=input_file, output_file=output_file)
+        insensitive_score = bleu_wrapper(ref_filename, output_file, False)
+        sensitive_score = bleu_wrapper(ref_filename, output_file, True)
+        with tf.io.gfile.GFile(trace_path+"bleu_insensitive", "ab+") as trace_file:
+            trace_file.write(str(insensitive_score)+'\n')
+        with tf.io.gfile.GFile(trace_path+"bleu_sensitive", "ab+") as trace_file:
+            trace_file.write(str(sensitive_score)+'\n')   
 
 
 
@@ -106,5 +110,5 @@ if __name__ == '__main__':
     params["static_batch"] = False
     params["num_gpus"] = 1
     params["use_synthetic_data"] = False
-    params["data_dir"] = './data/data/wmt32k-train-00001*'
+    params["data_dir"] = './data/data/wmt32k-train*'
     train_model(params)
