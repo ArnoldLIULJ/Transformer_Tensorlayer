@@ -78,6 +78,7 @@ class Model_SEQ2SEQ_Test(CustomTestCase):
         #                              epsilon=1e-9)
         
 
+
         for epoch in range(self.num_epochs):
             trainX, trainY = shuffle(self.trainX, self.trainY)
             total_loss, n_iter = 0, 0
@@ -90,6 +91,9 @@ class Model_SEQ2SEQ_Test(CustomTestCase):
                     
                     targets = Y
                     output = model_(inputs = [X, Y], training=True)
+                    # print(len(model_.trainable_weights))
+                    # print(model_.trainable_weights)
+                    # exit()
                     # print(logits.shape, Y.shape)
                     logits = metrics.MetricLayer(self.vocab_size)([output, targets])
                     logits, loss = metrics.LossLayer(self.vocab_size, 0.1)([logits, targets])
@@ -104,6 +108,8 @@ class Model_SEQ2SEQ_Test(CustomTestCase):
                     # loss = cross_entropy_seq(logits=output, target_seqs=Y)
 
                     grad = tape.gradient(loss, model_.trainable_weights)
+                    # print(grad)
+                    # exit()
                     optimizer_.apply_gradients(zip(grad, model_.trainable_weights))
                     # print(time.time()-start)
                 total_loss += loss
