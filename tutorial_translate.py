@@ -146,7 +146,7 @@ if __name__ == "__main__":
   subtokenizer = tokenizer.Subtokenizer("data/data/"+VOCAB_FILE)
   params = model_params.EXAMPLE_PARAMS
   model = Transformer(params)
-  load_weights = tl.files.load_npz(name='./checkouts_tl/t model.npz')
+  load_weights = tl.files.load_npz(name='./checkouts_tl/model.npz')
   tl.files.assign_weights(load_weights, model_)
   input_file = "./data/raw/dev/newstest2013.en"
   translate_file(model, subtokenizer, input_file, output_file="./output/out.de")
