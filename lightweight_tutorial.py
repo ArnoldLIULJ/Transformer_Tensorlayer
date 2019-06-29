@@ -1,11 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-import os
-import unittest
-
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-
 import tensorflow as tf
 import tensorlayer as tl
 import numpy as np
@@ -16,7 +8,14 @@ from weightLightModels import models_params
 from utils.pipeline_dataset import train_input_fn
 from utils import metrics
 from models import optimizer
+from translate_file import translate_file
+from utils import tokenizer
+from compute_bleu import bleu_wrapper
 
+
+_TARGET_VOCAB_SIZE = 32768  # Number of subtokens in the vocabulary list.
+_TARGET_THRESHOLD = 327  # Accept vocabulary if size is within this threshold
+VOCAB_FILE = "vocab.ende.%d" % _TARGET_VOCAB_SIZE
 
 class CustomSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
   def __init__(self, d_model, warmup_steps=5):
@@ -39,10 +38,15 @@ class CustomSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
 def train_model(input_params):
     params = model_params.EXAMPLE_PARAMS
     dataset = train_input_fn(input_params)
+    subtokenizer = tokenizer.Subtokenizer("data/data/"+VOCAB_FILE)
+    input_file = "data/data/newstest2014.en"
+    output_file = "./output/dev.de"
+
+    reference = "data/data/newstest2014.de"
+    trace_path = "checkpoints_tl/logging/"
+    num_epochs = 10
     
-    num_epochs = 50
-    # @tf.function
-    
+
     def train_step(inputs, targets):
         model.train()
         with tf.GradientTape() as tape:
@@ -72,7 +76,7 @@ def train_model(input_params):
             if (i % 100 == 0):
                 print('Batch ID {} at Epoch [{}/{}]: loss {:.4f}'.format(i, epoch + 1, num_epochs, loss))
             if (i % 2000 == 0):
-                tl.files.save_npz(model.all_weights, name='./checkpoints_tl_light/model.npz')
+                tl.files.save_npz(model.all_weights, name='./checkpoints_light/model.npz')
             
          
             total_loss += loss
@@ -81,7 +85,7 @@ def train_model(input_params):
         # printing average loss after every epoch
         print('Epoch [{}/{}]: loss {:.4f}'.format(epoch + 1, num_epochs, total_loss / n_iter))
         # save model weights after every epoch
-        tl.files.save_npz(model.all_weights, name='./checkpoints_tl_light/model.npz')
+        tl.files.save_npz(model.all_weights, name='./checkpoints_light/model.npz')
 
         # translate the evaluation file and calculate bleu scores
         translate_file(model, subtokenizer, input_file=input_file, output_file=output_file)
@@ -91,6 +95,7 @@ def train_model(input_params):
             trace_file.write(str(insensitive_score)+'\n')
         with tf.io.gfile.GFile(trace_path+"bleu_sensitive", "ab+") as trace_file:
             trace_file.write(str(sensitive_score)+'\n')   
+
 
 
 

@@ -44,7 +44,7 @@ def train_model(input_params):
 
     reference = "data/data/newstest2014.de"
     trace_path = "checkpoints_tl/logging/"
-    num_epochs = 50
+    num_epochs = 10
     
 
     def train_step(inputs, targets):
