@@ -29,8 +29,8 @@ import tensorlayer as tl
 # pylint: enable=g-bad-import-order
 
 from utils import tokenizer
-from v2 import models_params
-from v2.transformer import Transformer
+from models import model_params
+from models.transformer import Transformer
 _DECODE_BATCH_SIZE = 32
 _EXTRA_DECODE_LENGTH = 100
 _BEAM_SIZE = 4
@@ -123,9 +123,9 @@ def translate_file(
     return ds
 
   translations = []
-
+  model.eval()
   for i, text in enumerate(input_fn()):
-    prediction = model(inputs=text)
+    prediction = model(inputs=[text])
     for i, single in enumerate(prediction["outputs"]):
         translation = _trim_and_decode(single, subtokenizer)
         translations.append(translation)
@@ -144,9 +144,9 @@ def translate_file(
 
 if __name__ == "__main__":
   subtokenizer = tokenizer.Subtokenizer("data/data/"+VOCAB_FILE)
-  params = models_params.BASE_PARAMS
+  params = model_params.EXAMPLE_PARAMS
   model = Transformer(params)
-  model.load_weights('./checkpoints/my_checkpoint')
+  model.load_weights('./checkpoints_tl/my_checkpoint')
   input_file = "./data/raw/dev/newstest2013.en"
   translate_file(model, subtokenizer, input_file, output_file="./output/out.de")
     

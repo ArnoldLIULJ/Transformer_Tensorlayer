@@ -48,23 +48,10 @@ class Model_SEQ2SEQ_Test(CustomTestCase):
         pass
 
     def test_basic_simpleSeq2Seq(self):
+        trace_path = "checkpoints_tl/logging/loss"
         model_ = Transformer(TINY_PARAMS)
         self.vocab_size = TINY_PARAMS.vocab_size
         optimizer = tf.optimizers.Adam(learning_rate=0.01)
-        # optimizer = optimizer.LazyAdam(
-        #     params["learning_rate"],
-        #     params["optimizer_adam_beta1"],
-        #     params["optimizer_adam_beta2"],
-        #     epsilon=params["optimizer_adam_epsilon"])
-        # print(model_.trainable_weights)
-        # layer_normalization_print = [x for x in [t.name for t in model_.trainable_weights] if "feedforwardlayer" in x ]
-        # print(", ".join([t.name for t in model_.trainable_weights]))
-        # print(", ".join(layer_normalization_print))
-        # print("number of layers :  ", len(model_.trainable_weights))
-        # exit()
-        # print(len(model_.trainable_weights))
-        # print(model_.trainable_weights)
-        # exit()
         for epoch in range(self.num_epochs):
             model_.train()
             trainX, trainY = shuffle(self.trainX, self.trainY)
@@ -79,6 +66,9 @@ class Model_SEQ2SEQ_Test(CustomTestCase):
                     logits = model_(inputs = X, targets = Y)
                     logits = metrics.MetricLayer(self.vocab_size)([logits, targets])
                     logits, loss = metrics.LossLayer(self.vocab_size, 0.1)([logits, targets])
+                    
+                    with tf.io.gfile.GFile(trace_path, "ab+") as trace_file:
+                        trace_file.write(str(loss.numpy())+'\n')
                     grad = tape.gradient(loss, model_.all_weights)
                     optimizer.apply_gradients(zip(grad, model_.all_weights))
                     

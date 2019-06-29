@@ -8,7 +8,14 @@ from models.transformer_v2 import Transformer
 from utils.pipeline_dataset import train_input_fn
 from utils import metrics
 from models import optimizer
+from translate_file import translate_file
+from utils import tokenizer
+from compute_bleu import bleu_wrapper
 
+
+_TARGET_VOCAB_SIZE = 32768  # Number of subtokens in the vocabulary list.
+_TARGET_THRESHOLD = 327  # Accept vocabulary if size is within this threshold
+VOCAB_FILE = "vocab.ende.%d" % _TARGET_VOCAB_SIZE
 
 class CustomSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
   def __init__(self, d_model, warmup_steps=5):
@@ -31,12 +38,17 @@ class CustomSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
 def train_model(input_params):
     params = model_params.EXAMPLE_PARAMS
     dataset = train_input_fn(input_params)
-    
+    subtokenizer = tokenizer.Subtokenizer("data/data/"+VOCAB_FILE)
+    input_file = "data/data/newstest2014.en"
+    output_file = "./output/dev.de"
+
+    reference = "data/data/newstest2014.de"
+    trace_path = "checkpoints_tl/logging/"
     num_epochs = 50
-    # @tf.function
     
+
     def train_step(inputs, targets):
-        
+        model.train()
         with tf.GradientTape() as tape:
             #print(inputs)
             
@@ -51,7 +63,6 @@ def train_model(input_params):
 
     
     model = Transformer(params)
-    model.train()
     learning_rate = CustomSchedule(params.hidden_size, warmup_steps=params.learning_rate_warmup_steps)
     optimizer_ = optimizer.LazyAdam(learning_rate, beta_1=0.9, beta_2=0.98, epsilon=1e-9)
     
@@ -60,10 +71,20 @@ def train_model(input_params):
         total_loss, n_iter = 0, 0
         for i, [inputs, targets] in enumerate(dataset):
             loss = train_step(inputs, targets)
+            with tf.io.gfile.GFile(trace_path+"loss", "ab+") as trace_file:
+                trace_file.write(str(loss.numpy())+'\n')
             if (i % 100 == 0):
                 print('Batch ID {} at Epoch [{}/{}]: loss {:.4f}'.format(i, epoch + 1, num_epochs, loss))
             if ((i+1) % 2000 == 0):
                 tl.files.save_npz(model.all_weights, name='./checkouts_tl/model.npz')
+            if (i % 1 == 0):
+                translate_file(model, subtokenizer, input_file=input_file, output_file=output_file)
+                insensitive_score = bleu_wrapper(ref_filename, output_file, False)
+                sensitive_score = bleu_wrapper(ref_filename, output_file, True)
+                with tf.io.gfile.GFile(trace_path+"bleu_insensitive", "ab+") as trace_file:
+                    trace_file.write(str(insensitive_score)+'\n')
+                with tf.io.gfile.GFile(trace_path+"bleu_sensitive", "ab+") as trace_file:
+                    trace_file.write(str(sensitive_score)+'\n')            
             total_loss += loss
             n_iter += 1
 
@@ -85,5 +106,5 @@ if __name__ == '__main__':
     params["static_batch"] = False
     params["num_gpus"] = 1
     params["use_synthetic_data"] = False
-    params["data_dir"] = './data/data/wmt32k-train*'
+    params["data_dir"] = './data/data/wmt32k-train-00001*'
     train_model(params)

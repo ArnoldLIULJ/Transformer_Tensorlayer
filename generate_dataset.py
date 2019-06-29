@@ -65,8 +65,17 @@ _TRAIN_DATA_MIN_COUNT = 6
 _EVAL_DATA_SOURCES = [
     {
         "url": "http://data.statmt.org/wmt17/translation-task/dev.tgz",
-        "input": "newstest2013.en",
-        "target": "newstest2013.de",
+        "input": "newstest2012.en",
+        "target": "newstest2012.de",
+    }
+]
+
+_TEST_DATA_SOURCES = [
+    {
+        "url": ("https://storage.googleapis.com/tf-perf-public/"
+                "official_transformer/test_data/newstest2014.tgz"),
+        "input": "newstest2014.en",
+        "target": "newstest2014.de",
     }
 ]
 
@@ -359,8 +368,10 @@ def main(unused_argv):
 
   # Get paths of download/extracted training and evaluation files.
   print("Step 1/4: Downloading data from source")
+  train_files = get_raw_files(FLAGS.data_dir, _TEST_DATA_SOURCES)
   train_files = get_raw_files(FLAGS.raw_dir, _TRAIN_DATA_SOURCES)
   eval_files = get_raw_files(FLAGS.raw_dir, _EVAL_DATA_SOURCES)
+  
 
   # Create subtokenizer based on the training files.
   print("Step 2/4: Creating subtokenizer and building vocabulary")
