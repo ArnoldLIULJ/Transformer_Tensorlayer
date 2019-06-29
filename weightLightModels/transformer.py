@@ -414,9 +414,7 @@ class DecoderStack(tl.models.Model):
     self.params = params
     self.layers = []
     for _ in range(params.decoder_num_layers):
-      self_attention_layer = SelfAttentionLayer(
-          params.num_heads, params.hidden_size, 
-          params.keep_prob)
+      self_attention_layer = LightConv(params)
       enc_dec_attention_layer = MultiHeadAttentionLayer(
           params.num_heads, params.hidden_size, 
           params.keep_prob)
@@ -471,9 +469,7 @@ class DecoderStack(tl.models.Model):
       with tf.name_scope(layer_name):
         with tf.name_scope("self_attention"):
           decoder_inputs = self_attention_layer(
-              decoder_inputs,
-              mask=decoder_self_attention_bias,
-              cache=layer_cache)
+              decoder_inputs)
         with tf.name_scope("encdec_attention"):
           decoder_inputs = enc_dec_attention_layer(
               decoder_inputs,

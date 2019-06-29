@@ -22,6 +22,7 @@ class LightConv(tl.models.Model):
         inputs = self.in_layer(inputs)
         inputs = tf.reshape(inputs, [Batch_size, -1, inputs.shape[-1]])
         inputs = self.glu_layer(inputs)
+        # reshape inputs to [B, 1, S, H]
         inputs = tf.expand_dims(inputs, axis=1)
         inputs = self.light_conv_layer(inputs)
         inputs = tf.squeeze(inputs, axis=1)
