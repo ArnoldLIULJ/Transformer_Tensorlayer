@@ -30,7 +30,7 @@ import tensorlayer as tl
 
 from utils import tokenizer
 from models import model_params
-from models.transformer import Transformer
+from models.transformer_v2 import Transformer
 _DECODE_BATCH_SIZE = 32
 _EXTRA_DECODE_LENGTH = 100
 _BEAM_SIZE = 4

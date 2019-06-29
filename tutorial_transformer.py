@@ -75,7 +75,7 @@ def train_model(input_params):
                 trace_file.write(str(loss.numpy())+'\n')
             if (i % 100 == 0):
                 print('Batch ID {} at Epoch [{}/{}]: loss {:.4f}'.format(i, epoch + 1, num_epochs, loss))
-            if ((i+1) % 2000 == 0):
+            if (i % 2000 == 0):
                 tl.files.save_npz(model.all_weights, name='./checkouts_tl/model.npz')
             if (i % 1 == 0):
                 translate_file(model, subtokenizer, input_file=input_file, output_file=output_file)
