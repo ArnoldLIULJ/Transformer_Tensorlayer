@@ -29,8 +29,8 @@ import tensorlayer as tl
 # pylint: enable=g-bad-import-order
 
 from utils import tokenizer
-from models import model_params
-from models.transformer_v2 import Transformer
+from weightLightModels.transformer import Transformer
+from weightLightModels import model_params
 _DECODE_BATCH_SIZE = 32
 _EXTRA_DECODE_LENGTH = 100
 _BEAM_SIZE = 4
