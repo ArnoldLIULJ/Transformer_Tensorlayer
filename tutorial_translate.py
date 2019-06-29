@@ -147,7 +147,7 @@ if __name__ == "__main__":
   params = model_params.EXAMPLE_PARAMS
   model = Transformer(params)
   load_weights = tl.files.load_npz(name='./checkouts_tl/model.npz')
-  tl.files.assign_weights(load_weights, model_)
+  tl.files.assign_weights(load_weights, model)
   input_file = "./data/raw/dev/newstest2013.en"
   translate_file(model, subtokenizer, input_file, output_file="./output/out.de")
     
