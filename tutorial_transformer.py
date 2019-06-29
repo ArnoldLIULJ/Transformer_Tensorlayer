@@ -53,8 +53,7 @@ def train_model(input_params):
     model = Transformer(params)
     model.train()
     learning_rate = CustomSchedule(params.hidden_size, warmup_steps=params.learning_rate_warmup_steps)
-    optimizer_ = optimizer.LazyAdam(learning_rate, beta_1=0.9, beta_2=0.98, 
-                                     epsilon=1e-9)
+    optimizer_ = optimizer.LazyAdam(learning_rate, beta_1=0.9, beta_2=0.98, epsilon=1e-9)
     
     
     for epoch in range(num_epochs):
@@ -86,5 +85,5 @@ if __name__ == '__main__':
     params["static_batch"] = False
     params["num_gpus"] = 1
     params["use_synthetic_data"] = False
-    params["data_dir"] = './data/data/wmt32k-train-00001*'
+    params["data_dir"] = './data/data/wmt32k-train*'
     train_model(params)
