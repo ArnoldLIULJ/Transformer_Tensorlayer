@@ -125,7 +125,7 @@ def translate_file(
   translations = []
   model.eval()
   for i, text in enumerate(input_fn()):
-    prediction = model(inputs=[text])
+    prediction = model(inputs=text)
     for i, single in enumerate(prediction["outputs"]):
         translation = _trim_and_decode(single, subtokenizer)
         translations.append(translation)
@@ -148,6 +148,6 @@ if __name__ == "__main__":
   model = Transformer(params)
   load_weights = tl.files.load_npz(name='./checkouts_tl/model.npz')
   tl.files.assign_weights(load_weights, model)
-  input_file = "./data/raw/dev/newstest2013.en"
+  input_file = "README.md"
   translate_file(model, subtokenizer, input_file, output_file="./output/out.de")
     
