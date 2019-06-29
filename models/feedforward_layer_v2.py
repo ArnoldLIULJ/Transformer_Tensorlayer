@@ -67,6 +67,7 @@ class FeedForwardNetwork(tl.models.Model):
     length = tf.shape(x)[1]
     x = tf.reshape(x, [-1, x.shape[-1]])
     output = self.filter_dense_layer(x)
+    output = tf.nn.relu(output)
     output = tf.reshape(output, [batch_size, -1, output.shape[-1]])
     if self.is_train:
       output = tf.nn.dropout(output, rate=self.relu_dropout)

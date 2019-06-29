@@ -222,7 +222,7 @@ def _read_and_batch_from_files(
     tf.data.Dataset object containing examples loaded from the files.
   """
   dataset = tf.data.Dataset.list_files(file_pattern, shuffle=shuffle)
-
+  
   # Read files and interleave results. When training, the order of the examples
   # will be non-deterministic.
   options = tf.data.Options()

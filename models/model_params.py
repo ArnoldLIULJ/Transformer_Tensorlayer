@@ -14,6 +14,17 @@ class EXAMPLE_PARAMS(object):
     beam_size=4
     alpha=0.6 # used to calculate length normalization in beam search
 
+    label_smoothing=0.1
+    learning_rate=2.0
+    learning_rate_decay_rate=1.0
+    learning_rate_warmup_steps=16000
+
+    # Optimizer params
+    optimizer_adam_beta1=0.9
+    optimizer_adam_beta2=0.997
+    optimizer_adam_epsilon=1e-09
+
+
 
 
 class TINY_PARAMS(object):

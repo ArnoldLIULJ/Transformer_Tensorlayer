@@ -20,6 +20,7 @@ from __future__ import print_function
 
 import tensorflow as tf
 import tensorlayer as tl
+from models.Dense2D import Dense_without_bias
 
 
 class MultiHeadAttentionLayer(tl.models.Model):
@@ -43,13 +44,13 @@ class MultiHeadAttentionLayer(tl.models.Model):
     self.num_heads = num_heads
     self.attention_dropout = 1-keep_pro
     # Layers for linearly projecting the queries, keys, and values.
-    self.q_dense_layer = tl.layers.Dense(
+    self.q_dense_layer = Dense_without_bias(
       self.hidden_size, in_channels=self.hidden_size, W_init=tf.keras.initializers.get('glorot_uniform'), name="q")
-    self.k_dense_layer = tl.layers.Dense(
+    self.k_dense_layer = Dense_without_bias(
       self.hidden_size, in_channels=self.hidden_size, W_init=tf.keras.initializers.get('glorot_uniform'), name="k")
-    self.v_dense_layer = tl.layers.Dense(
+    self.v_dense_layer = Dense_without_bias(
       self.hidden_size, in_channels=self.hidden_size, W_init=tf.keras.initializers.get('glorot_uniform'), name="v")
-    self.output_dense_layer = tl.layers.Dense(
+    self.output_dense_layer = Dense_without_bias(
       self.hidden_size, in_channels=self.hidden_size, W_init=tf.keras.initializers.get('glorot_uniform'), name="output_transform")
     
 
