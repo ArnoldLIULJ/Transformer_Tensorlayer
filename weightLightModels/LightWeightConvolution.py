@@ -9,7 +9,6 @@ class LightConv(tl.models.Model):
     def __init__(self, params, name=None):
 
         super(LightConv, self).__init__(name=name)
-        print("It is Light Version")
         self.params = params
         self.in_layer = tl.layers.Dense(n_units=params.n_units, in_channels=params.hidden_size)
         self.glu_layer = GLU(params)
