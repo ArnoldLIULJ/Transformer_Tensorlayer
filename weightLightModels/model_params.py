@@ -7,7 +7,7 @@ class TINY_PARAMS(object):
 
     light_filter_size=(1,3)
     filter_size = light_filter_size[-1]
-    vocab_size = 50
+    vocab_size = 64
 
     encoder_num_layers = 2
     decoder_num_layers = 2

@@ -39,10 +39,10 @@ def train_model(input_params):
     params = model_params.EXAMPLE_PARAMS
     dataset = train_input_fn(input_params)
     subtokenizer = tokenizer.Subtokenizer("data/data/"+VOCAB_FILE)
-    input_file = "data/data/newstest2014.en"
+    input_file = "data/data/newstest2013.en"
     output_file = "./output/dev.de"
 
-    reference = "data/data/newstest2014.de"
+    reference = "data/data/newstest2013.de"
     trace_path = "checkpoints_tl/logging/"
     num_epochs = 10
     
@@ -63,6 +63,8 @@ def train_model(input_params):
 
     
     model = Transformer(params)
+    load_weights = tl.files.load_npz(name='./checkouts_tl/model.npz')
+    tl.files.assign_weights(load_weights, model)
     learning_rate = CustomSchedule(params.hidden_size, warmup_steps=params.learning_rate_warmup_steps)
     optimizer_ = optimizer.LazyAdam(learning_rate, beta_1=0.9, beta_2=0.98, epsilon=1e-9)
     
@@ -75,7 +77,7 @@ def train_model(input_params):
                 trace_file.write(str(loss.numpy())+'\n')
             if (i % 100 == 0):
                 print('Batch ID {} at Epoch [{}/{}]: loss {:.4f}'.format(i, epoch + 1, num_epochs, loss))
-            if (i % 2000 == 0):
+            if ((i+1) % 2000 == 0):
                 tl.files.save_npz(model.all_weights, name='./checkpoints_tl/model.npz')
             
          

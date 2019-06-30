@@ -63,8 +63,8 @@ def train_model(input_params):
 
     
     model = Transformer(params)
-    load_weights = tl.files.load_npz(name='./checkpoints_light/model.npz')
-    tl.files.assign_weights(load_weights, model)
+    # load_weights = tl.files.load_npz(name='./checkpoints_light/model.npz')
+    # tl.files.assign_weights(load_weights, model)
     learning_rate = CustomSchedule(params.hidden_size, warmup_steps=params.learning_rate_warmup_steps)
     optimizer_ = optimizer.LazyAdam(learning_rate, beta_1=0.9, beta_2=0.98, epsilon=1e-9)
     
@@ -72,12 +72,14 @@ def train_model(input_params):
     for epoch in range(num_epochs):
         total_loss, n_iter = 0, 0
         for i, [inputs, targets] in enumerate(dataset):
+            model.eval()
+            translate_file(model, subtokenizer, input_file=input_file, output_file=output_file)
             loss = train_step(inputs, targets)
             with tf.io.gfile.GFile(trace_path+"loss", "ab+") as trace_file:
                 trace_file.write(str(loss.numpy())+'\n')
             if (i % 100 == 0):
                 print('Batch ID {} at Epoch [{}/{}]: loss {:.4f}'.format(i, epoch + 1, num_epochs, loss))
-            if (i % 2000 == 0):
+            if ((i+1) % 2000 == 0):
                 tl.files.save_npz(model.all_weights, name='./checkpoints_light/model.npz')
             
          
@@ -112,5 +114,5 @@ if __name__ == '__main__':
     params["static_batch"] = False
     params["num_gpus"] = 1
     params["use_synthetic_data"] = False
-    params["data_dir"] = './data/data/wmt32k-train*'
+    params["data_dir"] = './data/data/wmt32k-train-00001*'
     train_model(params)

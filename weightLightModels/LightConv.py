@@ -3,7 +3,7 @@ import tensorlayer as tl
 from tensorlayer.layers.convolution.depthwise_conv import DepthwiseConv2d
 from weightLightModels.normalization import WeightNorm
 class LConv(tl.models.Model):
-    def __init__(self, params, name=None):
+    def __init__(self, params, padding='VALID', name=None):
         super(LConv, self).__init__(name=name)
         self.params = params
         self.H = params.H
@@ -11,7 +11,7 @@ class LConv(tl.models.Model):
         # self.softmax_layer = tl.layers.Lambda(lambda x: tf.nn.softmax(x), name='lambda')
         self.conv_Layer = WeightNorm(DepthwiseConv2d(
                 filter_size=params.light_filter_size,
-                in_channels=self.H), in_channels=self.H)
+                in_channels=self.H, padding=padding), in_channels=self.H)
     
     def forward(self, inputs):
 
