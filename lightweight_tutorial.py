@@ -73,6 +73,7 @@ def train_model(input_params):
     for epoch in range(num_epochs):
         total_loss, n_iter = 0, 0
         # translate the evaluation file and calculate bleu scores
+        model.eval()
         translate_file(model, subtokenizer, input_file=input_file, output_file=output_file)
         insensitive_score = bleu_wrapper(ref_filename, output_file, False)
         sensitive_score = bleu_wrapper(ref_filename, output_file, True)
