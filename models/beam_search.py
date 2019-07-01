@@ -28,7 +28,6 @@ class SequenceBeamSearchV2(v1.SequenceBeamSearch):
     def search(self, initial_ids, initial_cache):
         """Beam search for sequences with highest scores."""
         state, state_shapes = self._create_initial_state(initial_ids, initial_cache)
-
         finished_state = tf.while_loop(
             self._continue_search, self._search_step, loop_vars=[state],
             shape_invariants=[state_shapes], parallel_iterations=1, back_prop=False)

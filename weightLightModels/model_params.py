@@ -3,7 +3,7 @@ class TINY_PARAMS(object):
     n_channels = 2
     n_units = 128
     H = 32
-    light_filter_size=(1,9)
+    light_filter_size=(1,3)
     filter_size = light_filter_size[-1]
     vocab_size = 64
 
@@ -18,7 +18,7 @@ class TINY_PARAMS(object):
 
     # Default prediction params
     extra_decode_length=5
-    beam_size=2
+    beam_size=1
     alpha=0.6 # used to calculate length normalization in beam search
 
 

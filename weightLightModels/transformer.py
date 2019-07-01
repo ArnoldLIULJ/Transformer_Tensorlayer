@@ -203,11 +203,10 @@ class Transformer(tl.models.Model):
       """
       # Set decoder input to the last generated IDs
       decoder_input = ids[:, -1:]
-
       # Preprocess decoder input by getting embeddings and adding timing signal.
       decoder_input = self.embedding_softmax_layer(decoder_input)
       decoder_input += timing_signal[i:i + 1]
-
+      
       self_attention_bias = decoder_self_attention_bias[:, :, i:i + 1, :i + 1]
       decoder_outputs = self.decoder_stack(
           decoder_input,
@@ -223,90 +222,44 @@ class Transformer(tl.models.Model):
 
   def predict(self, encoder_outputs, encoder_decoder_attention_bias):
     """Return predicted sequence."""
-    # batch_size = tf.shape(encoder_outputs)[0]
-    # input_length = tf.shape(encoder_outputs)[1]
-    # max_decode_length = input_length + self.params.extra_decode_length
-
-    # symbols_to_logits_fn = self._get_symbols_to_logits_fn(
-    #     max_decode_length)
-
-    # # Create initial set of IDs that will be passed into symbols_to_logits_fn.
-    # initial_ids = tf.zeros([batch_size], dtype=tf.int32)
-
-    # # Create cache storing decoder attention values for each layer.
-    # # pylint: disable=g-complex-comprehension
-    # cache = {
-    #     "layer_%d" % layer: {
-    #         "k": tf.zeros([batch_size, 0, self.params.hidden_size]),
-    #         "v": tf.zeros([batch_size, 0, self.params.hidden_size])
-    #     } for layer in range(self.params.encoder_num_layers)
-    # }
-    # # pylint: enable=g-complex-comprehension
-
-    # # Add encoder output and attention bias to the cache.
-    # cache["encoder_outputs"] = encoder_outputs
-    # cache["encoder_decoder_attention_bias"] = encoder_decoder_attention_bias
-
-    # # Use beam search to find the top beam_size sequences and scores.
-    # decoded_ids, scores = beam_search.sequence_beam_search(
-    #     symbols_to_logits_fn=symbols_to_logits_fn,
-    #     initial_ids=initial_ids,
-    #     initial_cache=cache,
-    #     vocab_size=self.params.vocab_size,
-    #     beam_size=self.params.beam_size,
-    #     alpha=self.params.alpha,
-    #     max_decode_length=max_decode_length,
-    #     eos_id=1)
-
-    # # Get the top sequence for each batch element
-    # top_decoded_ids = decoded_ids[:, 0, 1:]
-    # top_scores = scores[:, 0]
-
-
-
-
-    # without beamsearch
-    batch_size = encoder_outputs.shape[0]
-    input_length = encoder_outputs.shape[1]
-
-
+    batch_size = tf.shape(encoder_outputs)[0]
+    input_length = tf.shape(encoder_outputs)[1]
     max_decode_length = input_length + self.params.extra_decode_length
-    # max_decode_length = 5
-    timing_signal = positional_encoding(
-        max_decode_length + 1, self.params.hidden_size)
 
-
-    decoder_input_ = tf.zeros([batch_size,1], dtype=tf.int32)
-    
-    
-    decoder_self_attention_bias = get_target_mask(
+    symbols_to_logits_fn = self._get_symbols_to_logits_fn(
         max_decode_length)
-    for i in range(max_decode_length):
-        decoder_input = self.embedding_softmax_layer(decoder_input_)
-        
-        decoder_outputs = self.decoder_stack(
-          decoder_input,
-          features=encoder_outputs,
-          target_mask=decoder_self_attention_bias,
-          input_mask=encoder_decoder_attention_bias)
-        
-        decoder_outputs = tf.argmax(decoder_outputs, axis=2, output_type=tf.dtypes.int32)
-        decoder_outputs = decoder_outputs[:,-1]
-        decoder_outputs = tf.reshape(decoder_outputs, [-1,1])
-        if (i == 0):
-          out = decoder_outputs
-        else:
-          out = tf.concat([out, decoder_outputs], axis=1)
-        decoder_input_ = out
-        
 
-      
+    # Create initial set of IDs that will be passed into symbols_to_logits_fn.
+    initial_ids = tf.zeros([batch_size], dtype=tf.int32)
 
+    # Create cache storing decoder attention values for each layer.
+    # pylint: disable=g-complex-comprehension
+    cache = {
+        "layer_%d" % layer: {
+            "ids": tf.zeros([batch_size, 0, self.params.hidden_size]),
+        } for layer in range(self.params.encoder_num_layers)
+    }
 
-        # decoder_input_ = tf.reshape(decoder_outputs, [-1,decoder_outputs.shape[-1]])
-        # print(decoder_input_.shape)
+    # Add encoder output and attention bias to the cache.
+    cache["encoder_outputs"] = encoder_outputs
+    cache["encoder_decoder_attention_bias"] = encoder_decoder_attention_bias
+    # Use beam search to find the top beam_size sequences and scores.
+    decoded_ids, scores = beam_search.sequence_beam_search(
+        symbols_to_logits_fn=symbols_to_logits_fn,
+        initial_ids=initial_ids,
+        initial_cache=cache,
+        vocab_size=self.params.vocab_size,
+        beam_size=self.params.beam_size,
+        alpha=self.params.alpha,
+        max_decode_length=max_decode_length,
+        eos_id=1)
 
-    return {"outputs": out[:,1:], "scores": 1}
+    # Get the top sequence for each batch element
+    top_decoded_ids = decoded_ids[:, 0, 1:]
+    top_scores = scores[:, 0]
+
+    return {"outputs": top_decoded_ids, "scores": top_scores}
+
 
 
 class LayerNormalization(tl.layers.Layer):
@@ -516,7 +469,7 @@ class DecoderStack(tl.models.Model):
       with tf.name_scope(layer_name):
         with tf.name_scope("self_attention"):
           decoder_inputs = self_attention_layer(
-              decoder_inputs)
+              decoder_inputs, cache=layer_cache)
         with tf.name_scope("encdec_attention"):
           decoder_inputs = enc_dec_attention_layer(
               decoder_inputs,

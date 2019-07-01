@@ -15,9 +15,13 @@ class LightConv(tl.models.Model):
         self.light_conv_layer = LConv(params, padding)
         self.out_layer = tl.layers.Dense(n_units=params.hidden_size, in_channels=params.filter_number//2)
 
-    def forward(self, inputs, mask=None):
+    def forward(self, inputs, cache=None):
         Batch_size = inputs.shape[0]
-        
+        original_length = inputs.shape[1]
+
+        if cache is not None:
+            inputs = tf.concat([cache["ids"], inputs], axis=1)
+            cache["ids"] = inputs
         
         inputs = tf.reshape(inputs, [-1, inputs.shape[-1]])
         inputs = self.in_layer(inputs)
@@ -34,7 +38,7 @@ class LightConv(tl.models.Model):
         inputs = tf.reshape(inputs, [-1, inputs.shape[-1]])
         inputs = self.out_layer(inputs)
         inputs = tf.reshape(inputs, [Batch_size, -1, inputs.shape[-1]])
-
+        inputs = inputs[:,-original_length:,:]
         return inputs
 
 

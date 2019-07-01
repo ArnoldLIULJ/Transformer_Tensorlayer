@@ -154,7 +154,6 @@ class MultiHeadAttentionLayer(tl.models.Model):
     
     # Calculate dot product attention
     logits = tf.matmul(q, k, transpose_b=True) #(Batch, num_head, length_q, length_k)
-    
     logits += bias
     weights = tf.nn.softmax(logits, name="attention_weights") #(Batch, num_head, length_q, length_k)
     if self.is_train:

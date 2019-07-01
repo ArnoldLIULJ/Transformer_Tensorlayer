@@ -217,6 +217,7 @@ class Transformer(tl.models.Model):
           cache=cache)
       logits = self.embedding_softmax_layer(decoder_outputs, mode="linear")
       logits = tf.squeeze(logits, axis=[1])
+      print(logits.shape)
       return logits, cache
 
     return symbols_to_logits_fn
@@ -267,48 +268,48 @@ class Transformer(tl.models.Model):
 
 
 
-    # # without beamsearch
-    # batch_size = encoder_outputs.shape[0]
-    # input_length = encoder_outputs.shape[1]
+'''
+
+    # without beamsearch
+    batch_size = encoder_outputs.shape[0]
+    input_length = encoder_outputs.shape[1]
 
 
-    # max_decode_length = input_length + self.params.extra_decode_length
-    # # max_decode_length = 5
-    # timing_signal = positional_encoding(
-    #     max_decode_length + 1, self.params.hidden_size)
+    max_decode_length = input_length + self.params.extra_decode_length
+    timing_signal = positional_encoding(
+        max_decode_length + 1, self.params.hidden_size)
 
 
-    # decoder_input_ = tf.zeros([batch_size,1], dtype=tf.int32)
+    decoder_input_ = tf.zeros([batch_size,1], dtype=tf.int32)
     
     
-    # decoder_self_attention_bias = get_target_mask(
-    #     max_decode_length)
-    # for i in range(max_decode_length):
-    #     decoder_input = self.embedding_softmax_layer(decoder_input_)
-        
-    #     decoder_outputs = self.decoder_stack(
-    #       decoder_input,
-    #       features=encoder_outputs,
-    #       target_mask=decoder_self_attention_bias,
-    #       input_mask=encoder_decoder_attention_bias)
-        
-    #     decoder_outputs = tf.argmax(decoder_outputs, axis=2, output_type=tf.dtypes.int32)
-    #     decoder_outputs = decoder_outputs[:,-1]
-    #     decoder_outputs = tf.reshape(decoder_outputs, [-1,1])
-    #     if (i == 0):
-    #       out = decoder_outputs
-    #     else:
-    #       out = tf.concat([out, decoder_outputs], axis=1)
-    #     decoder_input_ = out
+    decoder_self_attention_bias = get_target_mask(
+        max_decode_length)
+    for i in range(max_decode_length):
+        decoder_input = self.embedding_softmax_layer(decoder_input_)
+        decoder_input += timing_signal[i:i+1]
+        self_attention_bias = decoder_self_attention_bias[:, :, i:i + 1, :i + 1]
+        # print(decoder_input.shape)
+        decoder_outputs = self.decoder_stack(
+          decoder_input,
+          features=encoder_outputs,
+          target_mask=self_attention_bias,
+          input_mask=encoder_decoder_attention_bias,
+          cache=cache)
+
+        decoder_outputs = self.embedding_softmax_layer(decoder_outputs, mode="linear")
+        decoder_outputs = tf.squeeze(decoder_outputs, axis=1)
+        decoder_outputs = tf.argmax(decoder_outputs, axis=1, output_type=tf.dtypes.int32)
+        decoder_outputs = tf.reshape(decoder_outputs, [-1,1])
+        if (i == 0):
+          out = decoder_outputs
+        out = tf.concat([out, decoder_outputs], axis=1)
         
 
       
 
 
-        # decoder_input_ = tf.reshape(decoder_outputs, [-1,decoder_outputs.shape[-1]])
-        # print(decoder_input_.shape)
-
-    # return {"outputs": out[:,1:], "scores": 1}
+    return {"outputs": out[:,1:], "scores": 1}'''
 
 
 class LayerNormalization(tl.layers.Layer):

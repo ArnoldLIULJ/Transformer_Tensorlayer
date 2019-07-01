@@ -65,8 +65,8 @@ _TRAIN_DATA_MIN_COUNT = 6
 _EVAL_DATA_SOURCES = [
     {
         "url": "http://data.statmt.org/wmt17/translation-task/dev.tgz",
-        "input": "newstest2012.en",
-        "target": "newstest2012.de",
+        "input": "newstest2013.en",
+        "target": "newstest2013.de",
     }
 ]
 
