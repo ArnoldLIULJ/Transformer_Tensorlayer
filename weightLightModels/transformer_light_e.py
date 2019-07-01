@@ -377,8 +377,7 @@ class PrePostProcessingWrapper(tl.models.Model):
 
 
 class EncoderStack(tl.models.Model):  
-    """Transformer encoder stack.
-
+  """Transformer encoder stack.
   The encoder stack is made up of N identical layers. Each layer is composed
   of the sublayers:
     1. Self-attention layer
