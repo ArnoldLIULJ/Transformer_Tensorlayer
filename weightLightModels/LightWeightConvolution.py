@@ -18,14 +18,14 @@ class LightConv(tl.models.Model):
     def forward(self, inputs, mask=None):
         Batch_size = inputs.shape[0]
         
-        inputs = tf.pad(inputs, [[0,0],[self.params.light_filter_size[1]-1, 0],[0,0]])
+        
         inputs = tf.reshape(inputs, [-1, inputs.shape[-1]])
         inputs = self.in_layer(inputs)
 
         inputs = tf.reshape(inputs, [Batch_size, -1, inputs.shape[-1]])
+        inputs = tf.pad(inputs, [[0,0],[self.params.filter_size-1, 0],[0,0]])
         inputs = self.glu_layer(inputs)
-
-        
+        inputs = tf.pad(inputs, [[0,0],[self.params.light_filter_size[1]-1, 0],[0,0]])
         # reshape inputs to [B, 1, S, H]
         inputs = tf.expand_dims(inputs, axis=1)
         inputs = self.light_conv_layer(inputs)

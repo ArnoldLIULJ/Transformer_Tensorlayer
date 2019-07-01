@@ -11,6 +11,7 @@ class GLU(tl.models.Model):
             n_filter=params.filter_number,
             filter_size=params.filter_size,
             stride=1,
+            padding='VALID',
             in_channels=params.n_units
         )
         self.add_bias_layer = addBias(

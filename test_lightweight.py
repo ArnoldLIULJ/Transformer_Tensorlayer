@@ -35,9 +35,7 @@ class Model_SEQ2SEQ_Test(CustomTestCase):
         cls.trainY = np.random.randint(low=2, high=50, size=(50, 11))
 
         cls.trainX[:,-1] = 1
-        cls.trainY[:,-4] = 1
-        cls.trainY[:,-3:] = 0
-        cls.trainY[:0:3] = 0
+        cls.trainY[:,-1] = 1
         # Parameters
         cls.src_len = len(cls.trainX)
         cls.tgt_len = len(cls.trainY)
@@ -82,7 +80,7 @@ class Model_SEQ2SEQ_Test(CustomTestCase):
                     targets = Y
                     logits = model_(inputs = X, targets = Y)
                     targets = targets[:,3:]
-                    
+
                     logits = metrics.MetricLayer(self.vocab_size)([logits[:,:-3,:], targets])
                     logits, loss = metrics.LossLayer(self.vocab_size, 0.1)([logits, targets])
                     grad = tape.gradient(loss, model_.all_weights)
@@ -93,11 +91,9 @@ class Model_SEQ2SEQ_Test(CustomTestCase):
                 n_iter += 1
             model_.eval()
             test_sample = trainX[0:2, :]
-            top_n = 1
-            for i in range(top_n):
-                model_.eval()
-                prediction = model_(inputs = test_sample)
-                print("Prediction: >>>>>  ", prediction["outputs"], "\n Target: >>>>>  ", trainY[0:2, :], "\n\n")
+            model_.eval()
+            prediction = model_(inputs = test_sample)
+            print("Prediction: >>>>>  ", prediction["outputs"], "\n Target: >>>>>  ", trainY[0:2, :], "\n\n")
 
             print('Epoch [{}/{}]: loss {:.4f}'.format(epoch + 1, self.num_epochs, total_loss / n_iter))
 

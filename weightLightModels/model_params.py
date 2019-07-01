@@ -1,11 +1,9 @@
 class TINY_PARAMS(object):
-    filter_number = 64
+    filter_number = 128
     n_channels = 2
     n_units = 128
-    H = 2
-
-
-    light_filter_size=(1,3)
+    H = 32
+    light_filter_size=(1,9)
     filter_size = light_filter_size[-1]
     vocab_size = 64
 

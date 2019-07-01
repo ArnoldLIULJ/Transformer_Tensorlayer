@@ -77,6 +77,9 @@ class Model_SEQ2SEQ_Test(CustomTestCase):
                 n_iter += 1
             model_.eval()
             test_sample = trainX[0:2, :]
+            model_.eval()
+            prediction = model_(inputs = test_sample)
+            print("Prediction: >>>>>  ", prediction["outputs"], "\n Target: >>>>>  ", trainY[0:2, :], "\n\n")
 
             print('Epoch [{}/{}]: loss {:.4f}'.format(epoch + 1, self.num_epochs, total_loss / n_iter))
 
