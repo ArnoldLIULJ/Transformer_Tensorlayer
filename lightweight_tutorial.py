@@ -43,7 +43,7 @@ def train_model(input_params):
     input_file = "data/mock/mock.en"
     output_file = "./output/dev.de"
 
-    reference = "data/mock/mock.de"
+    ref_filename = "data/mock/mock.de"
     trace_path = "checkpoints_light/logging/"
     num_epochs = 10
     
