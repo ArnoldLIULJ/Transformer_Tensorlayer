@@ -73,8 +73,6 @@ def train_model(input_params):
     for epoch in range(num_epochs):
         total_loss, n_iter = 0, 0
         for i, [inputs, targets] in enumerate(dataset):
-            model.eval()
-            translate_file(model, subtokenizer, input_file=input_file, output_file=output_file)
             loss = train_step(inputs, targets)
             with tf.io.gfile.GFile(trace_path+"loss", "ab+") as trace_file:
                 trace_file.write(str(loss.numpy())+'\n')
