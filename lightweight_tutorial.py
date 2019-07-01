@@ -40,7 +40,7 @@ def train_model(input_params):
     params = model_params.EXAMPLE_PARAMS
     dataset = train_input_fn(input_params)
     subtokenizer = tokenizer.Subtokenizer("data/data/"+VOCAB_FILE)
-    input_file = "data/data/mock.en"
+    input_file = "data/mock/mock.en"
     output_file = "./output/dev.de"
 
     reference = "data/mock/mock.de"
