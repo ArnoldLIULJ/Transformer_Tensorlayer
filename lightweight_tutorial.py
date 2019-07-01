@@ -64,8 +64,8 @@ def train_model(input_params):
 
     
     model = Transformer(params)
-    load_weights = tl.files.load_npz(name='./checkpoints_light/model.npz')
-    tl.files.assign_weights(load_weights, model)
+    # load_weights = tl.files.load_npz(name='./checkpoints_light/model.npz')
+    # tl.files.assign_weights(load_weights, model)
     learning_rate = CustomSchedule(params.hidden_size, warmup_steps=params.learning_rate_warmup_steps)
     optimizer_ = optimizer.LazyAdam(learning_rate, beta_1=0.9, beta_2=0.98, epsilon=1e-9)
     
@@ -78,17 +78,11 @@ def train_model(input_params):
             loss = train_step(inputs, targets)
             with tf.io.gfile.GFile(trace_path+"loss", "ab+") as trace_file:
                 trace_file.write(str(loss.numpy())+'\n')
-            # if (i % 100 == 0):
-            #     print('Batch ID {} at Epoch [{}/{}]: loss {:.4f}'.format(i, epoch + 1, num_epochs, loss))
+            if (i % 100 == 0):
+                print('Batch ID {} at Epoch [{}/{}]: loss {:.4f}'.format(i, epoch + 1, num_epochs, loss))
             if ((i+1) % 2000 == 0):
                 tl.files.save_npz(model.all_weights, name='./checkpoints_light/model.npz')
             
-            if (i == 40844):
-                with tf.io.gfile.GFile(trace_path+"bleu_insensitive", "ab+") as trace_file:
-                    trace_file.write(str(insensitive_score)+'\n')
-                with tf.io.gfile.GFile(trace_path+"bleu_sensitive", "ab+") as trace_file:
-                    trace_file.write(str(sensitive_score)+'\n')   
-
          
             total_loss += loss
             n_iter += 1
@@ -102,7 +96,11 @@ def train_model(input_params):
         translate_file(model, subtokenizer, input_file=input_file, output_file=output_file)
         insensitive_score = bleu_wrapper(ref_filename, output_file, False)
         sensitive_score = bleu_wrapper(ref_filename, output_file, True)
-        
+        with tf.io.gfile.GFile(trace_path+"bleu_insensitive", "ab+") as trace_file:
+            trace_file.write(str(insensitive_score)+'\n')
+        with tf.io.gfile.GFile(trace_path+"bleu_sensitive", "ab+") as trace_file:
+            trace_file.write(str(sensitive_score)+'\n')   
+
 
 
 
