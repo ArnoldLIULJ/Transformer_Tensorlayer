@@ -40,10 +40,10 @@ def train_model(input_params):
     params = model_params.EXAMPLE_PARAMS
     dataset = train_input_fn(input_params)
     subtokenizer = tokenizer.Subtokenizer("data/data/"+VOCAB_FILE)
-    input_file = "data/data/newstest2014.en"
+    input_file = "data/data/mock.en"
     output_file = "./output/dev.de"
 
-    reference = "data/data/newstest2014.de"
+    reference = "data/mock/mock.de"
     trace_path = "checkpoints_light/logging/"
     num_epochs = 10
     
@@ -72,14 +72,20 @@ def train_model(input_params):
     
     for epoch in range(num_epochs):
         total_loss, n_iter = 0, 0
+        # translate the evaluation file and calculate bleu scores
+        translate_file(model, subtokenizer, input_file=input_file, output_file=output_file)
+        insensitive_score = bleu_wrapper(ref_filename, output_file, False)
+        sensitive_score = bleu_wrapper(ref_filename, output_file, True)
+        with tf.io.gfile.GFile(trace_path+"bleu_insensitive", "ab+") as trace_file:
+            trace_file.write(str(insensitive_score)+'\n')
+        with tf.io.gfile.GFile(trace_path+"bleu_sensitive", "ab+") as trace_file:
+            trace_file.write(str(sensitive_score)+'\n')   
         for i, [inputs, targets] in enumerate(dataset):
             loss = train_step(inputs, targets)
             with tf.io.gfile.GFile(trace_path+"loss", "ab+") as trace_file:
                 trace_file.write(str(loss.numpy())+'\n')
             if (i % 100 == 0):
                 print('Batch ID {} at Epoch [{}/{}]: loss {:.4f}'.format(i, epoch + 1, num_epochs, loss))
-            if ((i+1) % 2000 == 0):
-                tl.files.save_npz(model.all_weights, name='./checkpoints_light/model.npz')
             
          
             total_loss += loss
@@ -90,14 +96,7 @@ def train_model(input_params):
         # save model weights after every epoch
         tl.files.save_npz(model.all_weights, name='./checkpoints_light/model.npz')
 
-        # translate the evaluation file and calculate bleu scores
-        translate_file(model, subtokenizer, input_file=input_file, output_file=output_file)
-        insensitive_score = bleu_wrapper(ref_filename, output_file, False)
-        sensitive_score = bleu_wrapper(ref_filename, output_file, True)
-        with tf.io.gfile.GFile(trace_path+"bleu_insensitive", "ab+") as trace_file:
-            trace_file.write(str(insensitive_score)+'\n')
-        with tf.io.gfile.GFile(trace_path+"bleu_sensitive", "ab+") as trace_file:
-            trace_file.write(str(sensitive_score)+'\n')   
+
 
 
 
