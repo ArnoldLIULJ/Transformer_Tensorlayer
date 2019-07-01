@@ -45,7 +45,7 @@ def train_model(input_params):
 
     ref_filename = "data/mock/mock.de"
     trace_path = "checkpoints_light/logging/"
-    num_epochs = 10
+    num_epochs = 100
     
 
     def train_step(inputs, targets):
