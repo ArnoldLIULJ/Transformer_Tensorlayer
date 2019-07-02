@@ -30,7 +30,9 @@ import tensorlayer as tl
 
 from utils import tokenizer
 from models import model_params
+from weightLightModels import model_params as model_params_dw
 from models.transformer_v2 import Transformer
+from weightLightModels.transformer import Transformer as Transformer_DW
 _DECODE_BATCH_SIZE = 32
 _EXTRA_DECODE_LENGTH = 100
 _BEAM_SIZE = 4
@@ -144,10 +146,23 @@ def translate_file(
 
 if __name__ == "__main__":
   subtokenizer = tokenizer.Subtokenizer("data/data/"+VOCAB_FILE)
-  params = model_params.EXAMPLE_PARAMS
-  model = Transformer(params)
-  load_weights = tl.files.load_npz(name='./checkpoints_tl/model.npz')
-  tl.files.assign_weights(load_weights, model)
-  input_file = "./data/raw/dev/newstest2013.en"
+
+
+  if (len(sys.argv) > 1 and sys.argv[1] == "tl"):
+    params = model_params.EXAMPLE_PARAMS
+    model = Transformer(params)
+    load_weights = tl.files.load_npz(name='./checkpoints_tl/model.npz')
+    tl.files.assign_weights(load_weights, model)
+    input_file = "./data/raw/dev/newstest2013.en"
+    
+  else:
+    params = model_params_dw.EXAMPLE_PARAMS
+    model = Transformer_DW(params)
+    load_weights = tl.files.load_npz(name='./checkpoints_dw/model.npz')
+    tl.files.assign_weights(load_weights, model)
+    input_file = "./data/raw/dev/newstest2014.en"
+
   translate_file(model, subtokenizer, input_file, output_file="./output/out.de")
+
+
     
