@@ -42,7 +42,7 @@ def train_model(input_params):
     input_file = "data/data/newstest2013.en"
     output_file = "./output/dev.de"
 
-    reference = "data/data/newstest2013.de"
+    ref_filename = "data/data/newstest2013.de"
     trace_path = "checkpoints_tl/logging/"
     num_epochs = 10
     
@@ -79,7 +79,10 @@ def train_model(input_params):
                 print('Batch ID {} at Epoch [{}/{}]: loss {:.4f}'.format(i, epoch + 1, num_epochs, loss))
             if ((i+1) % 2000 == 0):
                 tl.files.save_npz(model.all_weights, name='./checkpoints_tl/model.npz')
-            if (i == 40844):
+            if (i == 0):
+                translate_file(model, subtokenizer, input_file=input_file, output_file=output_file)
+                insensitive_score = bleu_wrapper(ref_filename, output_file, False)
+                sensitive_score = bleu_wrapper(ref_filename, output_file, True)
                 with tf.io.gfile.GFile(trace_path+"bleu_insensitive", "ab+") as trace_file:
                     trace_file.write(str(insensitive_score)+'\n')
                 with tf.io.gfile.GFile(trace_path+"bleu_sensitive", "ab+") as trace_file:
@@ -94,9 +97,9 @@ def train_model(input_params):
         tl.files.save_npz(model.all_weights, name='./checkpoints_tl/model.npz')
 
         # translate the evaluation file and calculate bleu scores
-        translate_file(model, subtokenizer, input_file=input_file, output_file=output_file)
-        insensitive_score = bleu_wrapper(ref_filename, output_file, False)
-        sensitive_score = bleu_wrapper(ref_filename, output_file, True)
+        # translate_file(model, subtokenizer, input_file=input_file, output_file=output_file)
+        # insensitive_score = bleu_wrapper(ref_filename, output_file, False)
+        # sensitive_score = bleu_wrapper(ref_filename, output_file, True)
         # with tf.io.gfile.GFile(trace_path+"bleu_insensitive", "ab+") as trace_file:
         #     trace_file.write(str(insensitive_score)+'\n')
         # with tf.io.gfile.GFile(trace_path+"bleu_sensitive", "ab+") as trace_file:
