@@ -160,7 +160,7 @@ if __name__ == "__main__":
     model = Transformer_DW(params)
     load_weights = tl.files.load_npz(name='./checkpoints_dw/model.npz')
     tl.files.assign_weights(load_weights, model)
-    input_file = "./data/data/newstest2014.en"
+    input_file = "./data/data/newstest2013.en"
 
   translate_file(model, subtokenizer, input_file, output_file="./output/out.de")
 
