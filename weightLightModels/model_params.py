@@ -18,7 +18,7 @@ class TINY_PARAMS(object):
 
     # Default prediction params
     extra_decode_length=5
-    beam_size=1
+    beam_size=2
     alpha=0.6 # used to calculate length normalization in beam search
 
 

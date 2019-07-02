@@ -237,7 +237,7 @@ class Transformer(tl.models.Model):
     cache = {
         "layer_%d" % layer: {
             "ids": tf.zeros([batch_size, 0, self.params.hidden_size]),
-            "ids_": tf.zeros([batch_size, 0, self.params.n_units//2])
+            "ids_": tf.zeros([batch_size, 0, self.params.filter_number//2])
         } for layer in range(self.params.encoder_num_layers)
     }
 
