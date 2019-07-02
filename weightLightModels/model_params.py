@@ -25,8 +25,8 @@ class TINY_PARAMS(object):
 class EXAMPLE_PARAMS(object):
     vocab_size = 33945
 
-    filter_number = 64
-    n_units = 512
+    filter_number = 256
+    n_units = 1024
     H = 4
 
     light_filter_size=(1,5)
