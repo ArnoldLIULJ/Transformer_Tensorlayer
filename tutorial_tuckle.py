@@ -37,7 +37,7 @@ class CustomSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
 
 
 def train_model(input_params):
-    params = model_params.EXAMPLE_PARAMS
+    params = model_params.EXAMPLE_PARAMS_TUCKLE
     dataset = train_input_fn(input_params)
     subtokenizer = tokenizer.Subtokenizer("data/data/"+VOCAB_FILE)
     input_file = "data/data/newstest2013.en"
