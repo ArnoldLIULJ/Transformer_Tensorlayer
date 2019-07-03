@@ -11,6 +11,7 @@ from models import optimizer
 from translate_file import translate_file
 from utils import tokenizer
 from compute_bleu import bleu_wrapper
+import time
 
 
 _TARGET_VOCAB_SIZE = 32768  # Number of subtokens in the vocabulary list.
@@ -68,7 +69,7 @@ def train_model(input_params):
     learning_rate = CustomSchedule(params.hidden_size, warmup_steps=params.learning_rate_warmup_steps)
     optimizer_ = optimizer.LazyAdam(learning_rate, beta_1=0.9, beta_2=0.98, epsilon=1e-9)
     
-    
+    time = time_
     for epoch in range(num_epochs):
         total_loss, n_iter = 0, 0
         for i, [inputs, targets] in enumerate(dataset):
@@ -76,10 +77,11 @@ def train_model(input_params):
             with tf.io.gfile.GFile(trace_path+"loss", "ab+") as trace_file:
                 trace_file.write(str(loss.numpy())+'\n')
             if (i % 100 == 0):
-                print('Batch ID {} at Epoch [{}/{}]: loss {:.4f}'.format(i, epoch + 1, num_epochs, loss))
+                print('Batch ID {} at Epoch [{}/{}]: loss {:.4f} using {:.4f}'.format(i, epoch + 1, num_epochs, loss, (time.time()-time_)/100))
+                time_ = time.time()
             if ((i+1) % 2000 == 0):
                 tl.files.save_npz(model.all_weights, name='./checkpoints_tuckle/model.npz')
-            if (i == 0):
+            if (i == 5000):
                 translate_file(model, subtokenizer, input_file=input_file, output_file=output_file)
                 insensitive_score = bleu_wrapper(ref_filename, output_file, False)
                 sensitive_score = bleu_wrapper(ref_filename, output_file, True)
