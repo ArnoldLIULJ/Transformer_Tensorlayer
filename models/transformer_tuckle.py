@@ -348,7 +348,7 @@ class EncoderStack(tl.models.Model):
           params.num_heads, params.hidden_size, 
           params.keep_prob)
       feed_forward_network = FeedForwardLayer(
-          params.hidden_size, params.ff_size, params.keep_prob, 12, 5)
+          params.hidden_size, params.ff_size, params.keep_prob, params.R1, params.R2)
       # layer_attention_layer = MultiHeadAttentionLayer(
       #   params.num_heads, params.hidden_size, params.keep_prob)
 
@@ -422,7 +422,7 @@ class DecoderStack(tl.models.Model):
           params.num_heads, params.hidden_size, 
           params.keep_prob)
       feed_forward_network = FeedForwardLayer(
-          params.hidden_size, params.ff_size, params.keep_prob, 12, 5)
+          params.hidden_size, params.ff_size, params.keep_prob, params.R1, params.R2)
 
       self.layers.append([
           PrePostProcessingWrapper(self_attention_layer, params),
