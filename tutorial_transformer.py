@@ -79,7 +79,7 @@ def train_model(input_params):
                 print('Batch ID {} at Epoch [{}/{}]: loss {:.4f}'.format(i, epoch + 1, num_epochs, loss))
             if ((i+1) % 2000 == 0):
                 tl.files.save_npz(model.all_weights, name='./checkpoints_tl/model.npz')
-            if (i == 0):
+            if (i == 50000):
                 translate_file(model, subtokenizer, input_file=input_file, output_file=output_file)
                 insensitive_score = bleu_wrapper(ref_filename, output_file, False)
                 sensitive_score = bleu_wrapper(ref_filename, output_file, True)
