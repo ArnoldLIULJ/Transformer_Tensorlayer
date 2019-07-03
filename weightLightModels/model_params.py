@@ -1,5 +1,7 @@
 class TINY_PARAMS(object):
-    filter_number = 128
+    filter_number = 256
+    R1 = 4
+    R2 = 8
     n_channels = 2
     n_units = 128
     H = 32
@@ -29,15 +31,15 @@ class EXAMPLE_PARAMS(object):
     n_units = 1024
     H = 4
 
-    light_filter_size=(1,5)
+    light_filter_size=(1,8)
     filter_size = light_filter_size[-1]
-    encoder_num_layers = 6
-    decoder_num_layers = 6
+    encoder_num_layers = 4
+    decoder_num_layers = 4
 
-    hidden_size = 512
-    ff_size = 2048
+    hidden_size = 256
+    ff_size = 512
     num_heads = 8
-    keep_prob = 0.9
+    keep_prob = 0.8
 
     # Default prediction params
     extra_decode_length=50

@@ -38,7 +38,7 @@ class LightConv(tl.models.Model):
             inputs = tf.pad(inputs, [[0,0],[self.params.filter_size-1, 0],[0,0]])
 
         inputs = self.glu_layer(inputs)
-        # [B, S, n_unit//2]
+        # [B, S, filter_number//2]
         if cache is not None:
             stored_length = cache["ids_"].shape[1]
             if (stored_length < self.params.filter_size):

@@ -12,7 +12,7 @@ import tensorlayer as tl
 from tqdm import tqdm
 from sklearn.utils import shuffle
 # from models.transformer_v2 import Transformer
-from weightLightModels.transformer_ffn import Transformer
+from weightLightModels.transformer import Transformer
 from weightLightModels.model_params import TINY_PARAMS
 # from models import model_params
 from tests.utils import CustomTestCase

@@ -26,7 +26,7 @@ import tensorlayer as tl
 from models import embedding_layer_v2 as embedding_layer
 from models.attention_layer_v2 import SelfAttentionLayer, MultiHeadAttentionLayer
 from weightLightModels.LightWeightConvolution import LightConv
-from models.feedforward_layer_v2 import FeedForwardNetwork as FeedForwardLayer
+from models.feedforward_layer_v2 import TuckerDecomposition_FeedForwardNetwork as FeedForwardLayer
 from models.model_utils_v2 import get_position_encoding as positional_encoding
 from models.model_utils_v2 import get_decoder_self_attention_bias as get_target_mask
 from models.model_utils_v2 import get_padding_bias as get_input_mask
@@ -203,11 +203,10 @@ class Transformer(tl.models.Model):
       """
       # Set decoder input to the last generated IDs
       decoder_input = ids[:, -1:]
-
       # Preprocess decoder input by getting embeddings and adding timing signal.
       decoder_input = self.embedding_softmax_layer(decoder_input)
       decoder_input += timing_signal[i:i + 1]
-
+      
       self_attention_bias = decoder_self_attention_bias[:, :, i:i + 1, :i + 1]
       decoder_outputs = self.decoder_stack(
           decoder_input,
@@ -217,7 +216,6 @@ class Transformer(tl.models.Model):
           cache=cache)
       logits = self.embedding_softmax_layer(decoder_outputs, mode="linear")
       logits = tf.squeeze(logits, axis=[1])
-      print(logits.shape)
       return logits, cache
 
     return symbols_to_logits_fn
@@ -238,16 +236,14 @@ class Transformer(tl.models.Model):
     # pylint: disable=g-complex-comprehension
     cache = {
         "layer_%d" % layer: {
-            "k": tf.zeros([batch_size, 0, self.params.hidden_size]),
-            "v": tf.zeros([batch_size, 0, self.params.hidden_size])
+            "ids": tf.zeros([batch_size, 0, self.params.hidden_size]),
+            "ids_": tf.zeros([batch_size, 0, self.params.filter_number//2])
         } for layer in range(self.params.encoder_num_layers)
     }
-    # pylint: enable=g-complex-comprehension
-    
+
     # Add encoder output and attention bias to the cache.
     cache["encoder_outputs"] = encoder_outputs
     cache["encoder_decoder_attention_bias"] = encoder_decoder_attention_bias
-
     # Use beam search to find the top beam_size sequences and scores.
     decoded_ids, scores = beam_search.sequence_beam_search(
         symbols_to_logits_fn=symbols_to_logits_fn,
@@ -265,51 +261,6 @@ class Transformer(tl.models.Model):
 
     return {"outputs": top_decoded_ids, "scores": top_scores}
 
-
-
-
-'''
-
-    # without beamsearch
-    batch_size = encoder_outputs.shape[0]
-    input_length = encoder_outputs.shape[1]
-
-
-    max_decode_length = input_length + self.params.extra_decode_length
-    timing_signal = positional_encoding(
-        max_decode_length + 1, self.params.hidden_size)
-
-
-    decoder_input_ = tf.zeros([batch_size,1], dtype=tf.int32)
-    
-    
-    decoder_self_attention_bias = get_target_mask(
-        max_decode_length)
-    for i in range(max_decode_length):
-        decoder_input = self.embedding_softmax_layer(decoder_input_)
-        decoder_input += timing_signal[i:i+1]
-        self_attention_bias = decoder_self_attention_bias[:, :, i:i + 1, :i + 1]
-        # print(decoder_input.shape)
-        decoder_outputs = self.decoder_stack(
-          decoder_input,
-          features=encoder_outputs,
-          target_mask=self_attention_bias,
-          input_mask=encoder_decoder_attention_bias,
-          cache=cache)
-
-        decoder_outputs = self.embedding_softmax_layer(decoder_outputs, mode="linear")
-        decoder_outputs = tf.squeeze(decoder_outputs, axis=1)
-        decoder_outputs = tf.argmax(decoder_outputs, axis=1, output_type=tf.dtypes.int32)
-        decoder_outputs = tf.reshape(decoder_outputs, [-1,1])
-        if (i == 0):
-          out = decoder_outputs
-        out = tf.concat([out, decoder_outputs], axis=1)
-        
-
-      
-
-
-    return {"outputs": out[:,1:], "scores": 1}'''
 
 
 class LayerNormalization(tl.layers.Layer):
@@ -377,8 +328,9 @@ class PrePostProcessingWrapper(tl.models.Model):
     return x + y
 
 
-class EncoderStack(tl.models.Model):  
+class EncoderStack(tl.models.Model):
   """Transformer encoder stack.
+
   The encoder stack is made up of N identical layers. Each layer is composed
   of the sublayers:
     1. Self-attention layer
@@ -391,10 +343,13 @@ class EncoderStack(tl.models.Model):
     self.layers = []
     for _ in range(params.encoder_num_layers):
       # Create sublayers for each layer.
-      self_attention_layer = LightConv(params, padding='VALID')
+      self_attention_layer = SelfAttentionLayer(
+          params.num_heads, params.hidden_size, 
+          params.keep_prob)
       feed_forward_network = FeedForwardLayer(
-          params.hidden_size, params.ff_size, params.keep_prob)
-
+          params.hidden_size, params.ff_size, params.keep_prob, params.R1, params.R2)
+      # layer_attention_layer = MultiHeadAttentionLayer(
+      #   params.num_heads, params.hidden_size, params.keep_prob)
 
       self.layers.append([
           PrePostProcessingWrapper(self_attention_layer, params),
@@ -433,7 +388,7 @@ class EncoderStack(tl.models.Model):
       with tf.name_scope("layer_%d" % n):
         with tf.name_scope("self_attention"):
           encoder_inputs = self_attention_layer(
-              encoder_inputs)
+              encoder_inputs, mask=input_mask)
         # with tf.name_scope("layer_attention"):
         #   encoder_inputs = (inputs, y=encoder_inputs, mask=input_mask)
         with tf.name_scope("ffn"):
@@ -441,6 +396,7 @@ class EncoderStack(tl.models.Model):
               encoder_inputs)
 
     return self.output_normalization(encoder_inputs)
+
 
 
 class DecoderStack(tl.models.Model):
@@ -459,14 +415,12 @@ class DecoderStack(tl.models.Model):
     self.params = params
     self.layers = []
     for _ in range(params.decoder_num_layers):
-      self_attention_layer = SelfAttentionLayer(
-          params.num_heads, params.hidden_size, 
-          params.keep_prob)
+      self_attention_layer = LightConv(params, padding='VALID')
       enc_dec_attention_layer = MultiHeadAttentionLayer(
           params.num_heads, params.hidden_size, 
           params.keep_prob)
       feed_forward_network = FeedForwardLayer(
-          params.hidden_size, params.ff_size, params.keep_prob)
+          params.hidden_size, params.ff_size, params.keep_prob, params.R1, params.R2)
 
       self.layers.append([
           PrePostProcessingWrapper(self_attention_layer, params),
@@ -516,9 +470,7 @@ class DecoderStack(tl.models.Model):
       with tf.name_scope(layer_name):
         with tf.name_scope("self_attention"):
           decoder_inputs = self_attention_layer(
-              decoder_inputs,
-              mask=decoder_self_attention_bias,
-              cache=layer_cache)
+              decoder_inputs, cache=layer_cache)
         with tf.name_scope("encdec_attention"):
           decoder_inputs = enc_dec_attention_layer(
               decoder_inputs,
