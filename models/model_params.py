@@ -3,8 +3,6 @@ class EXAMPLE_PARAMS(object):
 
     encoder_num_layers = 6
     decoder_num_layers = 6
-    R1 = 128
-    R2 = 256
     hidden_size = 512
     ff_size = 2048
     num_heads = 8
@@ -53,8 +51,8 @@ class EXAMPLE_PARAMS_TUCKLE(object):
 
     encoder_num_layers = 4
     decoder_num_layers = 4
-    R1 = 64
-    R2 = 256
+    R1 = 16
+    R2 = 64
     hidden_size = 512
     ff_size = 2048
     num_heads = 8
