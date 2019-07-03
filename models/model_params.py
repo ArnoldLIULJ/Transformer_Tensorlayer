@@ -1,8 +1,8 @@
 class EXAMPLE_PARAMS(object):
     vocab_size = 33945
 
-    encoder_num_layers = 4
-    decoder_num_layers = 4
+    encoder_num_layers = 6
+    decoder_num_layers = 6
     R1 = 128
     R2 = 256
     hidden_size = 512
