@@ -3,7 +3,7 @@ import tensorlayer as tl
 import numpy as np
 import argparse
 from utils.tokenizer import *
-from weightLightModels.transformer_light_e import Transformer
+from weightLightModels.transformer import Transformer
 from weightLightModels import model_params
 from utils.pipeline_dataset import train_input_fn
 from utils import metrics
