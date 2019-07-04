@@ -64,8 +64,8 @@ def train_model(input_params):
 
     
     model = Transformer(params)
-    # load_weights = tl.files.load_npz(name='./checkpoints_tl/model.npz')
-    # tl.files.assign_weights(load_weights, model)
+    load_weights = tl.files.load_npz(name='./checkpoints_tl/model.npz')
+    tl.files.assign_weights(load_weights, model)
     learning_rate = CustomSchedule(params.hidden_size, warmup_steps=params.learning_rate_warmup_steps)
     optimizer_ = optimizer.LazyAdam(learning_rate, beta_1=0.9, beta_2=0.98, epsilon=1e-9)
     
@@ -82,14 +82,17 @@ def train_model(input_params):
                 time_ = time.time()            
             if ((i+1) % 2000 == 0):
                 tl.files.save_npz(model.all_weights, name='./checkpoints_tl/model.npz')
-            if (i == 50000):
+            if (i == 0):
                 translate_file(model, subtokenizer, input_file=input_file, output_file=output_file)
-                insensitive_score = bleu_wrapper(ref_filename, output_file, False)
-                sensitive_score = bleu_wrapper(ref_filename, output_file, True)
-                with tf.io.gfile.GFile(trace_path+"bleu_insensitive", "ab+") as trace_file:
-                    trace_file.write(str(insensitive_score)+'\n')
-                with tf.io.gfile.GFile(trace_path+"bleu_sensitive", "ab+") as trace_file:
-                    trace_file.write(str(sensitive_score)+'\n')   
+                try:
+                    insensitive_score = bleu_wrapper(ref_filename, output_file, False)
+                    sensitive_score = bleu_wrapper(ref_filename, output_file, True)
+                    with tf.io.gfile.GFile(trace_path+"bleu_insensitive", "ab+") as trace_file:
+                        trace_file.write(str(insensitive_score)+'\n')
+                    with tf.io.gfile.GFile(trace_path+"bleu_sensitive", "ab+") as trace_file:
+                        trace_file.write(str(sensitive_score)+'\n')
+                except:
+                    print("An exception occurred")
          
             total_loss += loss
             n_iter += 1
