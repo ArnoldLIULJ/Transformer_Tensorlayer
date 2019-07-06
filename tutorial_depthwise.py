@@ -50,6 +50,8 @@ def train_model(input_params):
 
     def train_step(inputs, targets):
         model.train()
+        with tf.GradientTape() as tape:
+            #print(inputs)
             
             logits = model(inputs=inputs, targets=targets)
             logits = metrics.MetricLayer(params.vocab_size)([logits, targets])
