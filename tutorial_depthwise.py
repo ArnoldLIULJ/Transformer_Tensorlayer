@@ -50,8 +50,6 @@ def train_model(input_params):
 
     def train_step(inputs, targets):
         model.train()
-        with tf.GradientTape() as tape:
-            #print(inputs)
             
             logits = model(inputs=inputs, targets=targets)
             logits = metrics.MetricLayer(params.vocab_size)([logits, targets])
@@ -64,8 +62,8 @@ def train_model(input_params):
 
     
     model = Transformer(params)
-    load_weights = tl.files.load_npz(name='./checkpoints_dw/model.npz')
-    tl.files.assign_weights(load_weights, model)
+    # load_weights = tl.files.load_npz(name='./checkpoints_dw/model.npz')
+    # tl.files.assign_weights(load_weights, model)
     learning_rate = CustomSchedule(params.hidden_size, warmup_steps=params.learning_rate_warmup_steps)
     optimizer_ = optimizer.LazyAdam(learning_rate, beta_1=0.9, beta_2=0.98, epsilon=1e-9)
     
