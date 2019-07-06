@@ -43,7 +43,7 @@ def train_model(input_params):
     input_file = "data/data/newstest2013.en"
     output_file = "./output/dev.de"
 
-    reference = "data/data/newstest2013.de"
+    ref_filename = "data/data/newstest2013.de"
     trace_path = "checkpoints_dw/logging/"
     num_epochs = 10
     
