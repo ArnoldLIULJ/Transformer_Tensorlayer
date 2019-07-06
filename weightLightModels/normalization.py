@@ -1,8 +1,3 @@
-"""
-From pull request:
-https://github.com/tensorflow/tensorflow/pull/21276
-"""
-
 from weightLightModels.wrapper import Wrapper
 from tensorlayer.layers import Layer
 from tensorflow.python.framework import tensor_shape
@@ -13,7 +8,6 @@ from tensorflow.python.keras import initializers
 from tensorflow.python.framework import ops
 from tensorflow.python.ops import array_ops
 from tensorflow.python.ops import variable_scope
-from tensorflow.python.eager import context
 
 
 class WeightNorm(Wrapper):
@@ -47,18 +41,11 @@ class WeightNorm(Wrapper):
             raise ValueError(
                 'Please initialize `WeightNorm` layer with a '
                 '`Layer` instance. You passed: {input}'.format(input=layer))
-
-        if not context.executing_eagerly() and data_init:
-            raise NotImplementedError(
-                'Data dependent variable initialization is not available for '
-                'graph execution')
-
         self.initialized = True
         if data_init:
             self.initialized = False
 
         super(WeightNorm, self).__init__(layer, **kwargs)
-        # self._track_checkpointable(layer, name='layer')
 
     def _compute_weights(self):
         """Generate weights by combining the direction of weight vector

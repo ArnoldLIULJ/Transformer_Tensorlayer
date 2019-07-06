@@ -346,14 +346,13 @@ class EncoderStack(tl.models.Model):
       self_attention_layer = SelfAttentionLayer(
           params.num_heads, params.hidden_size, 
           params.keep_prob)
-      # feed_forward_network = FeedForwardLayer(
-      #     params.hidden_size, params.ff_size, params.keep_prob)
-      # layer_attention_layer = MultiHeadAttentionLayer(
-      #   params.num_heads, params.hidden_size, params.keep_prob)
+      feed_forward_network = FeedForwardLayer(
+          params.hidden_size, params.ff_size, params.keep_prob)
+
 
       self.layers.append([
           PrePostProcessingWrapper(self_attention_layer, params),
-          # PrePostProcessingWrapper(feed_forward_network, params)
+          PrePostProcessingWrapper(feed_forward_network, params)
       ])
 
     # Create final layer normalization layer.
@@ -383,17 +382,15 @@ class EncoderStack(tl.models.Model):
     for n, layer in enumerate(self.layers):
       # Run inputs through the sublayers.
       self_attention_layer = layer[0]
-      # feed_forward_network = layer[1]
+      feed_forward_network = layer[1]
 
       with tf.name_scope("layer_%d" % n):
         with tf.name_scope("self_attention"):
           encoder_inputs = self_attention_layer(
               encoder_inputs, mask=input_mask)
-        # with tf.name_scope("layer_attention"):
-        #   encoder_inputs = (inputs, y=encoder_inputs, mask=input_mask)
-        # with tf.name_scope("ffn"):
-        #   encoder_inputs = feed_forward_network(
-        #       encoder_inputs)
+        with tf.name_scope("ffn"):
+          encoder_inputs = feed_forward_network(
+              encoder_inputs)
 
     return self.output_normalization(encoder_inputs)
 
@@ -419,13 +416,13 @@ class DecoderStack(tl.models.Model):
       enc_dec_attention_layer = MultiHeadAttentionLayer(
           params.num_heads, params.hidden_size, 
           params.keep_prob)
-      # feed_forward_network = FeedForwardLayer(
-      #     params.hidden_size, params.ff_size, params.keep_prob)
+      feed_forward_network = FeedForwardLayer(
+          params.hidden_size, params.ff_size, params.keep_prob)
 
       self.layers.append([
           PrePostProcessingWrapper(self_attention_layer, params),
           PrePostProcessingWrapper(enc_dec_attention_layer, params),
-          # PrePostProcessingWrapper(feed_forward_network, params)
+          PrePostProcessingWrapper(feed_forward_network, params)
       ])
     self.output_normalization = LayerNormalization(params.hidden_size)
 
@@ -462,7 +459,7 @@ class DecoderStack(tl.models.Model):
     for n, layer in enumerate(self.layers):
       self_attention_layer = layer[0]
       enc_dec_attention_layer = layer[1]
-      # feed_forward_network = layer[2]
+      feed_forward_network = layer[2]
 
       # Run inputs through the sublayers.
       layer_name = "layer_%d" % n
@@ -476,9 +473,9 @@ class DecoderStack(tl.models.Model):
               decoder_inputs,
               y=encoder_outputs,
               mask=attention_bias)
-        # with tf.name_scope("ffn"):
-        #   decoder_inputs = feed_forward_network(
-        #       decoder_inputs)
+        with tf.name_scope("ffn"):
+          decoder_inputs = feed_forward_network(
+              decoder_inputs)
 
     return self.output_normalization(decoder_inputs)
 
