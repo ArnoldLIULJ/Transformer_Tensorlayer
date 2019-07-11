@@ -125,7 +125,7 @@ def translate_file(
   translations = []
 
   for i, text in enumerate(input_fn()):
-    prediction = model(inputs=text)
+    prediction = model(inputs=text, training=False)
     for i, single in enumerate(prediction["outputs"]):
         translation = _trim_and_decode(single, subtokenizer)
         translations.append(translation)
@@ -146,7 +146,11 @@ if __name__ == "__main__":
   subtokenizer = tokenizer.Subtokenizer("data/data/"+VOCAB_FILE)
   params = models_params.BASE_PARAMS
   model = Transformer(params)
-  model.load_weights('./checkpoints/my_checkpoint')
-  input_file = "./data/raw/dev/newstest2013.en"
+  model.load_weights('./pretrained/iwslt2016_E17L2.78-26078.index')
+
+  print(model.trainable_weights)
+
+
+  input_file = "README.md"
   translate_file(model, subtokenizer, input_file, output_file="./output/out.de")
     

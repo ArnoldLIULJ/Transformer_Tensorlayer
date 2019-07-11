@@ -8,6 +8,9 @@ class Wrapper(Layer):
   Do not use this class as a layer, it is only an abstract base class.
   Arguments:
     layer: The layer to be wrapped.
+
+  see example:
+    tl.layers.normalization
   """
 
   def __init__(self, layer, **kwargs):

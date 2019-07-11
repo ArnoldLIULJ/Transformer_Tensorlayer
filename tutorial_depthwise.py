@@ -116,5 +116,5 @@ if __name__ == '__main__':
     params["static_batch"] = False
     params["num_gpus"] = 1
     params["use_synthetic_data"] = False
-    params["data_dir"] = './data/data/wmt32k-train*'
+    params["data_dir"] = './data/data/wmt32k-train-00001*'
     train_model(params)
