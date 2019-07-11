@@ -8,9 +8,9 @@ class LConv(tl.models.Model):
         self.params = params
         self.H = params.H
         self.in_channels = params.filter_number//2
-        self.conv_Layer = WeightNorm(DepthwiseConv2d(
+        self.conv_Layer = DepthwiseConv2d(
                 filter_size=params.light_filter_size,
-                in_channels=self.H, padding=padding))
+                in_channels=self.H, padding=padding)
     
     def forward(self, inputs):
 
