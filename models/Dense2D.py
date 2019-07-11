@@ -2,15 +2,10 @@ import tensorflow as tf
 import tensorlayer as tl
 
 class Dense_without_bias(tl.layers.Layer):
-  """Calculates input embeddings and pre-softmax linear with shared weights."""
+
 
   def __init__(self, hidden_size, in_channels, W_init, name=None):
-    """Specify characteristic parameters of embedding layer.
 
-    Args:
-      vocab_size: Number of tokens in the embedding. (Typically ~32,000)
-      hidden_size: Dimensionality of the embedding. (Typically 512 or 1024)
-    """
     super(Dense_without_bias, self).__init__(name=name)
     self.hidden_size = hidden_size
     self.in_channel = in_channels
@@ -20,8 +15,6 @@ class Dense_without_bias(tl.layers.Layer):
 
   def build(self, inputs_shape):
     with tf.name_scope("Dense_without_bias"):
-      # Create and initialize weights. The random normal initializer was chosen
-      # arbitrarily, and works well.
         self.W = self._get_weights('weights', shape=(self.in_channel, self.hidden_size),
             init=self.w_init)
 

@@ -28,10 +28,16 @@ class EXAMPLE_PARAMS(object):
 
 class TINY_PARAMS(object):
     vocab_size = 50
-
     encoder_num_layers = 2
     decoder_num_layers = 2
-
+    filter_number = 256
+    R1 = 4
+    R2 = 8
+    n_channels = 2
+    n_units = 128
+    H = 32
+    light_filter_size=(1,3)
+    filter_size = light_filter_size[-1]
     hidden_size = 64
     ff_size = 16
     num_heads = 4
