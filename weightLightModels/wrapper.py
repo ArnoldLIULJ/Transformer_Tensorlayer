@@ -6,15 +6,15 @@ class Wrapper(Layer):
   """Abstract wrapper base class.
   Wrappers take another layer and augment it in various ways.
   Do not use this class as a layer, it is only an abstract base class.
-  Two usable wrappers are the `TimeDistributed` and `Bidirectional` wrappers.
   Arguments:
     layer: The layer to be wrapped.
   """
 
-  def __init__(self, layer, in_channels, **kwargs):
+  def __init__(self, layer, **kwargs):
+    super(Wrapper, self).__init__(**kwargs)
     assert isinstance(layer, Layer)
     self.layer = layer
-    self.input_shape = in_channels
+    self.input_shape = self.layer.in_channels
     super(Wrapper, self).__init__(**kwargs)
     self.build(input_shape=self.input_shape)
 
