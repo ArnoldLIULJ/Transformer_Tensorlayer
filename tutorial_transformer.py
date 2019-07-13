@@ -102,15 +102,6 @@ def train_model(input_params):
         # save model weights after every epoch
         tl.files.save_npz(model.all_weights, name='./checkpoints_tl/model.npz')
 
-        # translate the evaluation file and calculate bleu scores
-        # translate_file(model, subtokenizer, input_file=input_file, output_file=output_file)
-        # insensitive_score = bleu_wrapper(ref_filename, output_file, False)
-        # sensitive_score = bleu_wrapper(ref_filename, output_file, True)
-        # with tf.io.gfile.GFile(trace_path+"bleu_insensitive", "ab+") as trace_file:
-        #     trace_file.write(str(insensitive_score)+'\n')
-        # with tf.io.gfile.GFile(trace_path+"bleu_sensitive", "ab+") as trace_file:
-        #     trace_file.write(str(sensitive_score)+'\n')   
-
 
 
 

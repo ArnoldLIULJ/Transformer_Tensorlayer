@@ -11,7 +11,7 @@ import tensorflow as tf
 import tensorlayer as tl
 from tqdm import tqdm
 from sklearn.utils import shuffle
-from models.transformer_v2 import Transformer
+from models.transformer_v3 import Transformer
 from models.model_params import TINY_PARAMS
 from tests.utils import CustomTestCase
 from utils import metrics
@@ -54,6 +54,7 @@ class Model_SEQ2SEQ_Test(CustomTestCase):
         optimizer = tf.optimizers.Adam(learning_rate=0.01)
         for epoch in range(self.num_epochs):
             model_.train()
+            t = time.time()
             trainX, trainY = shuffle(self.trainX, self.trainY)
             total_loss, n_iter = 0, 0
             for X, Y in tqdm(tl.iterate.minibatches(inputs=trainX, targets=trainY, batch_size=self.batch_size,
@@ -75,6 +76,7 @@ class Model_SEQ2SEQ_Test(CustomTestCase):
             
                 total_loss += loss
                 n_iter += 1
+            print(time.time()-t)
             model_.eval()
             test_sample = trainX[0:2, :]
             model_.eval()

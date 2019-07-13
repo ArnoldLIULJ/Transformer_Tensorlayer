@@ -83,7 +83,17 @@ def train_model(input_params):
             if ((i+1) % 2000 == 0):
                 tl.files.save_npz(model.all_weights, name='./checkpoints_dw/model.npz')
 
-         
+            if (i == 50000):
+                translate_file(model, subtokenizer, input_file=input_file, output_file=output_file)
+                try:
+                    insensitive_score = bleu_wrapper(ref_filename, output_file, False)
+                    sensitive_score = bleu_wrapper(ref_filename, output_file, True)
+                    with tf.io.gfile.GFile(trace_path+"bleu_insensitive", "ab+") as trace_file:
+                        trace_file.write(str(insensitive_score)+'\n')
+                    with tf.io.gfile.GFile(trace_path+"bleu_sensitive", "ab+") as trace_file:
+                        trace_file.write(str(sensitive_score)+'\n')
+                except:
+                    print("An exception occurred")
             total_loss += loss
             n_iter += 1
 
@@ -93,14 +103,6 @@ def train_model(input_params):
         tl.files.save_npz(model.all_weights, name='./checkpoints_dw/model.npz')
 
 
-        # translate the evaluation file and calculate bleu scores
-        # translate_file(model, subtokenizer, input_file=input_file, output_file=output_file)
-        # insensitive_score = bleu_wrapper(ref_filename, output_file, False)
-        # sensitive_score = bleu_wrapper(ref_filename, output_file, True)
-        # with tf.io.gfile.GFile(trace_path+"bleu_insensitive", "ab+") as trace_file:
-        #     trace_file.write(str(insensitive_score)+'\n')
-        # with tf.io.gfile.GFile(trace_path+"bleu_sensitive", "ab+") as trace_file:
-        #     trace_file.write(str(sensitive_score)+'\n')   
 
 
 
@@ -116,5 +118,5 @@ if __name__ == '__main__':
     params["static_batch"] = False
     params["num_gpus"] = 1
     params["use_synthetic_data"] = False
-    params["data_dir"] = './data/data/wmt32k-train-00001*'
+    params["data_dir"] = './data/data/wmt32k-train*'
     train_model(params)
