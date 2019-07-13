@@ -26,7 +26,7 @@ import tensorlayer as tl
 from models import embedding_layer_v2 as embedding_layer
 from models.attention_layer_v3 import SelfAttentionLayer, MultiHeadAttentionLayer
 from weightLightModels.LightWeightConvolution import LightConv
-from models.feedforward_layer_v2 import FeedForwardNetwork as FeedForwardLayer
+from models.feedforward_layer_v3 import FeedForwardNetwork as FeedForwardLayer
 from models.model_utils_v2 import get_position_encoding as positional_encoding
 from models.model_utils_v2 import get_decoder_self_attention_bias as get_target_mask
 from models.model_utils_v2 import get_padding_bias as get_input_mask
