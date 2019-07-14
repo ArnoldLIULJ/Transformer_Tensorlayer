@@ -25,7 +25,7 @@ import tensorlayer as tl
 class FeedForwardNetwork(tl.models.Model):
   """Fully connected feedforward network."""
 
-  def __init__(self, hidden_size, filter_size, relu_dropout):
+  def __init__(self, hidden_size, filter_size, keep_prob):
     """Initialize FeedForwardNetwork.
 
     Args:
@@ -36,7 +36,7 @@ class FeedForwardNetwork(tl.models.Model):
     super(FeedForwardNetwork, self).__init__()
     self.hidden_size = hidden_size
     self.filter_size = filter_size
-    self.relu_dropout = relu_dropout
+    self.relu_dropout = 1-keep_prob
     self.filter_dense_layer = tl.layers.Dense(
       self.filter_size, in_channels=self.hidden_size, W_init=tf.keras.initializers.get('glorot_uniform'), name="input_layer")
     self.output_dense_layer = tl.layers.Dense(
@@ -82,7 +82,7 @@ class FeedForwardNetwork(tl.models.Model):
 class TuckerDecomposition_FeedForwardNetwork(tl.layers.Layer):
   """Fully connected feedforward network."""
 
-  def __init__(self, hidden_size, filter_size, relu_dropout, R1, R2):
+  def __init__(self, hidden_size, filter_size, keep_prob, R1, R2):
     """Initialize FeedForwardNetwork.
 
     Args:
@@ -95,7 +95,7 @@ class TuckerDecomposition_FeedForwardNetwork(tl.layers.Layer):
     self.I1 = filter_size
     self.R1 = R1
     self.R2 = R2
-    self.relu_dropout = relu_dropout
+    self.relu_dropout = 1-keep_prob
     
     self.build(tuple())
     self._built = True
@@ -158,7 +158,7 @@ class TuckerDecomposition_FeedForwardNetwork(tl.layers.Layer):
 class TuckerDecomposition_FeedForwardNetwork_2(tl.layers.Layer):
   """Fully connected feedforward network."""
 
-  def __init__(self, hidden_size, filter_size, relu_dropout, R1, R2):
+  def __init__(self, hidden_size, filter_size, keep_prob, R1, R2):
     """Initialize FeedForwardNetwork.
 
     Args:
@@ -171,7 +171,7 @@ class TuckerDecomposition_FeedForwardNetwork_2(tl.layers.Layer):
     self.I1 = filter_size
     self.R1 = R1
     self.R2 = R2
-    self.relu_dropout = relu_dropout
+    self.relu_dropout = 1-keep_prob
     
     self.build(tuple())
     self._built = True
