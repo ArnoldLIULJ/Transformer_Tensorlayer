@@ -52,17 +52,22 @@ class TINY_PARAMS(object):
 
 
 
-class EXAMPLE_PARAMS_TUCKLE(object):
+class EXAMPLE_PARAMS_v4(object):
     vocab_size = 33945
 
-    encoder_num_layers = 4
-    decoder_num_layers = 4
-    R1 = 16
-    R2 = 64
-    hidden_size = 512
-    ff_size = 2048
+    filter_number = 256
+    n_units = 1024
+    H = 4
+
+    light_filter_size=(1,8)
+    filter_size = light_filter_size[-1]
+    encoder_num_layers = 3
+    decoder_num_layers = 3
+
+    hidden_size = 256
+    ff_size = 512
     num_heads = 8
-    keep_prob = 0.9
+    keep_prob = 0.8
 
     # Default prediction params
     extra_decode_length=50
