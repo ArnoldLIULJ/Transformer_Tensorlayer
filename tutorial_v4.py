@@ -114,7 +114,7 @@ if __name__ == '__main__':
     params["num_parallel_calls"] = 1
     params["repeat_dataset"] = 1
     params["static_batch"] = False
-    params["num_gpus"] = 1
+    params["num_gpus"] = 2
     params["use_synthetic_data"] = False
     params["data_dir"] = './data/data/wmt32k-train*'
     train_model(params)
