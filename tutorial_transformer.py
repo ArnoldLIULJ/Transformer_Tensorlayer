@@ -40,10 +40,10 @@ def train_model(input_params):
     params = model_params.EXAMPLE_PARAMS
     dataset = train_input_fn(input_params)
     subtokenizer = tokenizer.Subtokenizer("data/data/"+VOCAB_FILE)
-    input_file = "data/data/newstest2013.en"
+    input_file = "data/raw/dev/newstest2013.en"
     output_file = "./output/dev.de"
 
-    ref_filename = "data/data/newstest2013.de"
+    ref_filename = "data/raw/dev/newstest2013.de"
     trace_path = "checkpoints_tl/logging/"
     num_epochs = 10
     
@@ -82,7 +82,7 @@ def train_model(input_params):
                 time_ = time.time()            
             if ((i+1) % 2000 == 0):
                 tl.files.save_npz(model.all_weights, name='./checkpoints_tl/model.npz')
-            if (i == 0):
+            if (i == 80000):
                 translate_file(model, subtokenizer, input_file=input_file, output_file=output_file)
                 try:
                     insensitive_score = bleu_wrapper(ref_filename, output_file, False)
