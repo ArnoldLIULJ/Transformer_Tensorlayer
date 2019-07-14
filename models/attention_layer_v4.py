@@ -21,13 +21,12 @@ from __future__ import print_function
 import tensorflow as tf
 import tensorlayer as tl
 from models.Dense2D import Dense_without_bias
-import numpy as np
 
 
 class MultiHeadAttentionLayer(tl.models.Model):
   """Multi-headed attention layer."""
 
-  def __init__(self, num_heads, hidden_size, keep_prob):
+  def __init__(self, num_heads, hidden_size, keep_pro):
     """Initialize Attention.
 
     Args:
@@ -43,28 +42,13 @@ class MultiHeadAttentionLayer(tl.models.Model):
     super(MultiHeadAttentionLayer, self).__init__()
     self.hidden_size = hidden_size
     self.num_heads = num_heads
-    self.attention_dropout = 1-keep_prob
-    self.seq_length = 50
-
-    self.one_by_one_layer = tl.layers.Conv1d(
-              n_filter=1,
-              filter_size=2,
-              stride=2,
-              padding='VALID',
-              in_channels=hidden_size
-          )
-    # for i in range(self.seq_length):
-    #   self.one_by_one_layer.append(tl.layers.Conv1d(
-    #           n_filter=1,
-    #           filter_size=2,
-    #           stride=2,
-    #           padding='VALID',
-    #           in_channels=hidden_size
-    #       )
-    #   )
+    self.attention_dropout = 1-keep_pro
+    self.grouped_size = 2
+    self.group_attention_layer = tl.layers.Conv1d(n_filter=hidden_size, filter_size=self.grouped_size, stride=self.grouped_size, padding='VALID', in_channels=hidden_size)
     self.output_dense_layer = Dense_without_bias(
       self.hidden_size, in_channels=self.hidden_size, W_init=tf.keras.initializers.get('glorot_uniform'), name="output_transform")
     
+    # self.w_layer = Dense_without_bias(self.hidden_size, in_channels=self.hidden_size, W_init=tf.keras.initializers.get('glorot_uniform'), name="q")
 
 
   def get_config(self):
@@ -74,6 +58,45 @@ class MultiHeadAttentionLayer(tl.models.Model):
         "attention_dropout": self.attention_dropout,
     }
 
+  def split_heads(self, x):
+    """Split x into different heads, and transpose the resulting value.
+
+    The tensor is transposed to insure the inner dimensions hold the correct
+    values during the matrix multiplication.
+
+    Args:
+      x: A tensor with shape [batch_size, length, hidden_size]
+
+    Returns:
+      A tensor with shape [batch_size, num_heads, length, hidden_size/num_heads]
+    """
+    with tf.name_scope("split_heads"):
+      batch_size = tf.shape(x)[0]
+      length = tf.shape(x)[1]
+
+      # Calculate depth of last dimension after it has been split.
+      depth = (self.hidden_size // self.num_heads)
+
+      # Split the last dimension
+      x = tf.reshape(x, [batch_size, length, self.num_heads, depth])
+
+      # Transpose the result
+      return tf.transpose(x, [0, 2, 1, 3])
+
+  def combine_heads(self, x):
+    """Combine tensor that has been split.
+
+    Args:
+      x: A tensor [batch_size, num_heads, length, hidden_size/num_heads]
+
+    Returns:
+      A tensor with shape [batch_size, length, hidden_size]
+    """
+    with tf.name_scope("combine_heads"):
+      batch_size = tf.shape(x)[0]
+      length = tf.shape(x)[2]
+      x = tf.transpose(x, [0, 2, 1, 3])  # --> [batch, length, num_heads, depth]
+      return tf.reshape(x, [batch_size, length, self.hidden_size])
 
   def forward(self, x, y, mask, cache=None):
     """Apply attention mechanism to x and y.
@@ -98,38 +121,12 @@ class MultiHeadAttentionLayer(tl.models.Model):
     # values rather than regular attention (which uses a single q, k, v).
     bias = mask
     Batch_size = x.shape[0]
-    k = v = y
+    # x = tf.reshape(x, [-1, x.shape[-1]])
+    # q = self.w_layer(x)
+    # q = tf.reshape(q, [Batch_size, -1, q.shape[-1]])
     q = x
-    
-    for i in range(y.shape[1]):
-        concat = np.zeros((Batch_size,x.shape[1]+y.shape[1],x.shape[-1]))
-        concat[:,::2,:] = x
-        concat[:,1::2,:] = y
-        concat = tf.convert_to_tensor(concat, dtype=tf.float32)
-        y = tf.roll(y, shift=[-1], axis=[1])
-        concat = self.one_by_one_layer(concat)
-        if (i == 0):
-            output = concat
-        else:
-            output = tf.concat([output, concat], axis=2)
-
-
-    for i in range(x.shape[1]):
-        out = tf.reshape(output[:,i,:], [Batch_size, 1, -1])
-        seq = tf.roll(out, shift=[i], axis=[2])
-        if (i == 0):
-          output_ = seq
-        else:
-          output_ = tf.concat([output_, seq], axis=1)
-    
-    attention = output_ # [Batch_size, length, length]
-    bias = tf.squeeze(bias, 1)
-    attention += bias
-    weights = tf.nn.softmax(attention, name="attention_weights") #(Batch, num_head, length_q, length_k)
-    if self.is_train:
-      weights = tf.nn.dropout(weights, rate=self.attention_dropout)
-    
-    attention_output = tf.matmul(weights, v)
+    k = v = self.group_attention_layer(y)
+  
     
 
     if cache is not None:
@@ -142,16 +139,34 @@ class MultiHeadAttentionLayer(tl.models.Model):
       cache["k"] = k
       cache["v"] = v
 
+    # Split q, k, v into heads.
+    q = self.split_heads(q)
+    k = self.split_heads(k)
+    v = self.split_heads(v) #(Batch, num_head, length_v, dk)
     
+    # Scale q to prevent the dot product between q and k from growing too large.
+    depth = (self.hidden_size // self.num_heads)
+    q *= depth ** -0.5
+    # print(q.shape, k.shape)
+    # Calculate dot product attention
+    logits = tf.matmul(q, k, transpose_b=True) #(Batch, num_head, length_q, length_k)
+    # print(logits.shape)
 
+    # print(logits.shape, bias.shape)
+    logits += bias[:,:,:,self.grouped_size-1::self.grouped_size]
+    weights = tf.nn.softmax(logits, name="attention_weights") #(Batch, num_head, length_q, length_k)
+    if self.is_train:
+      weights = tf.nn.dropout(weights, rate=self.attention_dropout)
+    
+    attention_output = tf.matmul(weights, v)
 
+    # Recombine heads --> [batch_size, length_q, hidden_size]
+    attention_output = self.combine_heads(attention_output)
 
     # Run the combined outputs through another linear projection layer.
     attention_output = tf.reshape(attention_output, [-1, attention_output.shape[-1]])
     attention_output = self.output_dense_layer(attention_output)
     attention_output = tf.reshape(attention_output, [Batch_size, -1, attention_output.shape[-1]])
-
-    print(attention_output.shape)
     return attention_output
 
 

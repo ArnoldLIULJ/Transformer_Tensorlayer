@@ -166,7 +166,7 @@ class MultiHeadAttentionLayer(tl.models.Model):
     
     attention_output = tf.matmul(weights, v)
 
-    # Recombine heads --> [batch_size, length, hidden_size]
+    # Recombine heads --> [batch_size, length_q, hidden_size]
     attention_output = self.combine_heads(attention_output)
 
     # Run the combined outputs through another linear projection layer.

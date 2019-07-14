@@ -28,8 +28,8 @@ class EXAMPLE_PARAMS(object):
 
 class TINY_PARAMS(object):
     vocab_size = 50
-    encoder_num_layers = 2
-    decoder_num_layers = 2
+    encoder_num_layers = 4
+    decoder_num_layers = 4
     filter_number = 256
     R1 = 4
     R2 = 8

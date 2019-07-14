@@ -11,7 +11,8 @@ import tensorflow as tf
 import tensorlayer as tl
 from tqdm import tqdm
 from sklearn.utils import shuffle
-from models.transformer_v4 import Transformer
+from models.transformer_v2 import Transformer
+# from weightLightModels.transformer import Transformer
 from models.model_params import TINY_PARAMS
 from tests.utils import CustomTestCase
 from utils import metrics
@@ -29,7 +30,7 @@ class Model_SEQ2SEQ_Test(CustomTestCase):
 
         cls.embedding_size = 32
         cls.dec_seq_length = 5
-        cls.trainX = np.random.randint(low=2, high=50, size=(50, 10))
+        cls.trainX = np.random.randint(low=2, high=50, size=(50, 11))
         cls.trainY = np.random.randint(low=2, high=50, size=(50, 10))
 
         cls.trainX[:,-1] = 1
@@ -50,6 +51,9 @@ class Model_SEQ2SEQ_Test(CustomTestCase):
     def test_basic_simpleSeq2Seq(self):
         trace_path = "checkpoints_tl/logging/loss"
         model_ = Transformer(TINY_PARAMS)
+
+        # print(", ".join(x for x in [t.name for t in model_.trainable_weights]))
+
         self.vocab_size = TINY_PARAMS.vocab_size
         optimizer = tf.optimizers.Adam(learning_rate=0.01)
         for epoch in range(self.num_epochs):
@@ -77,6 +81,7 @@ class Model_SEQ2SEQ_Test(CustomTestCase):
                 total_loss += loss
                 n_iter += 1
             print(time.time()-t)
+            tl.files.save_npz(model_.all_weights, name='./model_v4.npz')
             model_.eval()
             test_sample = trainX[0:2, :]
             model_.eval()
