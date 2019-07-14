@@ -25,7 +25,7 @@ import tensorlayer as tl
 class FeedForwardNetwork(tl.models.Model):
   """Fully connected feedforward network."""
 
-  def __init__(self, hidden_size, filter_size, relu_dropout):
+  def __init__(self, hidden_size, filter_size, keep_prob):
     """Initialize FeedForwardNetwork.
 
     Args:
@@ -36,7 +36,7 @@ class FeedForwardNetwork(tl.models.Model):
     super(FeedForwardNetwork, self).__init__()
     self.hidden_size = hidden_size
     self.filter_size = filter_size
-    self.relu_dropout = relu_dropout
+    self.relu_dropout = 1-keep_prob
     self.one_by_one_layer = tl.layers.Conv1d(
             n_filter=hidden_size,
             filter_size=1,
