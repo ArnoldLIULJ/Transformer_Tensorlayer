@@ -11,7 +11,7 @@ import tensorflow as tf
 import tensorlayer as tl
 from tqdm import tqdm
 from sklearn.utils import shuffle
-from models.transformer_v2 import Transformer
+from models.transformer_v4 import Transformer
 from models.model_params import TINY_PARAMS
 from tests.utils import CustomTestCase
 from utils import metrics
@@ -30,7 +30,7 @@ class Model_SEQ2SEQ_Test(CustomTestCase):
         cls.embedding_size = 32
         cls.dec_seq_length = 5
         cls.trainX = np.random.randint(low=2, high=50, size=(50, 10))
-        cls.trainY = np.random.randint(low=2, high=50, size=(50, 11))
+        cls.trainY = np.random.randint(low=2, high=50, size=(50, 10))
 
         cls.trainX[:,-1] = 1
         cls.trainY[:,-1] = 1

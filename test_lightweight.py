@@ -56,26 +56,27 @@ class Model_SEQ2SEQ_Test(CustomTestCase):
 
         for epoch in range(self.num_epochs):
             model_.train()
+            t = time.time()
             trainX, trainY = shuffle(self.trainX, self.trainY)
             total_loss, n_iter = 0, 0
             for X, Y in tqdm(tl.iterate.minibatches(inputs=trainX, targets=trainY, batch_size=self.batch_size,
-                                                    shuffle=True), total=self.n_step,
+                                                    shuffle=False), total=self.n_step,
                              desc='Epoch[{}/{}]'.format(epoch + 1, self.num_epochs), leave=False):
 
                 with tf.GradientTape() as tape:
-                    
+
                     targets = Y
                     logits = model_(inputs = X, targets = Y)
-                    targets = targets
-
                     logits = metrics.MetricLayer(self.vocab_size)([logits, targets])
                     logits, loss = metrics.LossLayer(self.vocab_size, 0.1)([logits, targets])
+                    
                     grad = tape.gradient(loss, model_.all_weights)
                     optimizer.apply_gradients(zip(grad, model_.all_weights))
                     
-            
+                
                 total_loss += loss
                 n_iter += 1
+            print(time.time()-t)
             model_.eval()
             test_sample = trainX[0:2, :]
             model_.eval()
