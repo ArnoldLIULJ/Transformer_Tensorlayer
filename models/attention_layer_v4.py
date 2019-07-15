@@ -43,8 +43,18 @@ class MultiHeadAttentionLayer(tl.models.Model):
     self.hidden_size = hidden_size
     self.num_heads = num_heads
     self.attention_dropout = 1-keep_pro
-    self.grouped_size = 2
-    self.group_attention_layer = tl.layers.Conv1d(n_filter=hidden_size, filter_size=self.grouped_size, stride=self.grouped_size, padding='VALID', in_channels=hidden_size)
+    self.grouped_size = []
+    self.group_attention_layer = []
+    
+    for i in range(1,4):
+      self.grouped_size.append(i)
+      self.group_attention_layer.append(
+        tl.layers.Conv1d(n_filter=hidden_size, 
+        filter_size=i, 
+        stride=i, 
+        padding='VALID', 
+        in_channels=hidden_size)
+      )
     self.output_dense_layer = Dense_without_bias(
       self.hidden_size, in_channels=self.hidden_size, W_init=tf.keras.initializers.get('glorot_uniform'), name="output_transform")
     
@@ -121,47 +131,43 @@ class MultiHeadAttentionLayer(tl.models.Model):
     # values rather than regular attention (which uses a single q, k, v).
     bias = mask
     Batch_size = x.shape[0]
-    # x = tf.reshape(x, [-1, x.shape[-1]])
-    # q = self.w_layer(x)
-    # q = tf.reshape(q, [Batch_size, -1, q.shape[-1]])
-    q = x
-    k = v = self.group_attention_layer(y)
-  
     
 
-    if cache is not None:
+
+    for i, layer in enumerate(self.group_attention_layer):
+      q = x
+      k = v = layer(y)
+
+      # Split q, k, v into heads.
+      q = self.split_heads(q)
+      k = self.split_heads(k)
+      v = self.split_heads(v) #(Batch, num_head, length_v, dk)
       
-      # Combine cached keys and values with new keys and values.
-      k = tf.concat([cache["k"], k], axis=1)
-      v = tf.concat([cache["v"], v], axis=1)
+      # Scale q to prevent the dot product between q and k from growing too large.
+      depth = (self.hidden_size // self.num_heads)
+      q *= depth ** -0.5
+      # print(q.shape, k.shape)
+      # Calculate dot product attention
+      logits = tf.matmul(q, k, transpose_b=True) #(Batch, num_head, length_q, length_k)
+      # print(logits.shape)
 
-      # Update cache
-      cache["k"] = k
-      cache["v"] = v
+      # print(logits.shape, bias.shape)
+      logits += bias[:,:,:,self.grouped_size[i]-1::self.grouped_size[i]]
+      weights = tf.nn.softmax(logits, name="attention_weights") #(Batch, num_head, length_q, length_k)
 
-    # Split q, k, v into heads.
-    q = self.split_heads(q)
-    k = self.split_heads(k)
-    v = self.split_heads(v) #(Batch, num_head, length_v, dk)
+      if self.is_train:
+        weights = tf.nn.dropout(weights, rate=self.attention_dropout)
+      
+      attention_output = tf.matmul(weights, v)
+      if i == 0:
+        output = attention_output
+      else:
+        output += attention_output
+
+
     
-    # Scale q to prevent the dot product between q and k from growing too large.
-    depth = (self.hidden_size // self.num_heads)
-    q *= depth ** -0.5
-    # print(q.shape, k.shape)
-    # Calculate dot product attention
-    logits = tf.matmul(q, k, transpose_b=True) #(Batch, num_head, length_q, length_k)
-    # print(logits.shape)
-
-    # print(logits.shape, bias.shape)
-    logits += bias[:,:,:,self.grouped_size-1::self.grouped_size]
-    weights = tf.nn.softmax(logits, name="attention_weights") #(Batch, num_head, length_q, length_k)
-    if self.is_train:
-      weights = tf.nn.dropout(weights, rate=self.attention_dropout)
-    
-    attention_output = tf.matmul(weights, v)
-
     # Recombine heads --> [batch_size, length_q, hidden_size]
-    attention_output = self.combine_heads(attention_output)
+    attention_output = self.combine_heads(output)
 
     # Run the combined outputs through another linear projection layer.
     attention_output = tf.reshape(attention_output, [-1, attention_output.shape[-1]])
