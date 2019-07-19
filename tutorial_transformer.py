@@ -73,6 +73,7 @@ def train_model(input_params):
     for epoch in range(num_epochs):
         total_loss, n_iter = 0, 0
         for i, [inputs, targets] in enumerate(dataset):
+            print(inputs, targets)
             loss = train_step(inputs, targets)
             with tf.io.gfile.GFile(trace_path+"loss", "ab+") as trace_file:
                 trace_file.write(str(loss.numpy())+'\n')
@@ -116,5 +117,5 @@ if __name__ == '__main__':
     params["static_batch"] = False
     params["num_gpus"] = 1
     params["use_synthetic_data"] = False
-    params["data_dir"] = './data/data/wmt32k-train*'
+    params["data_dir"] = './data/data/wmt32k-train-00001*'
     train_model(params)

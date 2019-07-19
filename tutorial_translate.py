@@ -154,10 +154,10 @@ if __name__ == "__main__":
     load_weights = tl.files.load_npz(name='./checkpoints_tl/model.npz')
     tl.files.assign_weights(load_weights, model)
     input_file = "./data/raw/dev/newstest2013.en"
-  elif (sys.argv[1] == "tuckle"):
-    params = model_params.EXAMPLE_PARAMS_TUCKLE
+  elif (sys.argv[1] == "task"):
+    params = model_params.EXAMPLE_PARAMS
     model = Transformer(params)
-    load_weights = tl.files.load_npz(name='./checkpoints_tuckle/model.npz')
+    load_weights = tl.files.load_npz(name='./task/model.npz')
     tl.files.assign_weights(load_weights, model)
     input_file = "./data/raw/dev/newstest2013.en"
 

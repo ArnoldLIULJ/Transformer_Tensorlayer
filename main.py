@@ -127,5 +127,3 @@ class Model_SEQ2SEQ_Test(CustomTestCase):
 if __name__ == '__main__':
     unittest.main()
 
-
-#ljas
