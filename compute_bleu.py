@@ -118,7 +118,7 @@ def define_compute_bleu_flags():
       name="translation", default="./output/out.de", help=None)
 
   flags.DEFINE_string(
-      name="reference", default="./data/raw/dev/newstest2013.de", help=None)
+      name="reference", default="./data/raw/dev/newstest2014.de", help=None)
 
   flags.DEFINE_enum(
       name="bleu_variant", short_name="bv", default="both",
