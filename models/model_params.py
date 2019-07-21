@@ -87,3 +87,29 @@ class EXAMPLE_PARAMS_v4(object):
 
 
 
+
+
+class EXAMPLE_PARAMS_v5(object):
+    vocab_size = 33945
+
+    encoder_num_layers = 3
+    decoder_num_layers = 3
+    hidden_size = 512
+    ff_size = 1024
+    num_heads = 8
+    keep_prob = 0.9
+
+    # Default prediction params
+    extra_decode_length=50
+    beam_size=4
+    alpha=0.6 # used to calculate length normalization in beam search
+
+    label_smoothing=0.1
+    learning_rate=2.0
+    learning_rate_decay_rate=1.0
+    learning_rate_warmup_steps=16000
+
+    # Optimizer params
+    optimizer_adam_beta1=0.9
+    optimizer_adam_beta2=0.997
+    optimizer_adam_epsilon=1e-09

@@ -390,8 +390,6 @@ class EncoderStack(tl.models.Model):
         with tf.name_scope("self_attention"):
           encoder_inputs = self_attention_layer(
               encoder_inputs, mask=input_mask)
-        # with tf.name_scope("layer_attention"):
-        #   encoder_inputs = (inputs, y=encoder_inputs, mask=input_mask)
         with tf.name_scope("ffn"):
           encoder_inputs = feed_forward_network(
               encoder_inputs)
