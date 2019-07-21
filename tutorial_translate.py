@@ -159,7 +159,7 @@ if __name__ == "__main__":
     model = Transformer(params)
     load_weights = tl.files.load_npz(name='./task/model.npz')
     tl.files.assign_weights(load_weights, model)
-    input_file = "./data/raw/dev/newstest2014.en"
+    input_file = "./data/raw/dev/newstest2013.en"
 
   else:
     params = model_params_dw.EXAMPLE_PARAMS
