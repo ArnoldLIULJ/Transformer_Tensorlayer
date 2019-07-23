@@ -101,7 +101,7 @@ class EXAMPLE_PARAMS_v5(object):
 
     # Default prediction params
     extra_decode_length=50
-    beam_size=4
+    beam_size=5
     alpha=0.6 # used to calculate length normalization in beam search
 
     label_smoothing=0.1
