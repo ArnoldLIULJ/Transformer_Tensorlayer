@@ -11,6 +11,9 @@ from models import optimizer
 from v2.translate import translate_file
 from utils import tokenizer
 from compute_bleu import bleu_wrapper
+_TARGET_VOCAB_SIZE = 32768  # Number of subtokens in the vocabulary list.
+_TARGET_THRESHOLD = 327  # Accept vocabulary if size is within this threshold
+VOCAB_FILE = "vocab.ende.%d" % _TARGET_VOCAB_SIZE
 
 class CustomSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
   def __init__(self, d_model, warmup_steps=5):
