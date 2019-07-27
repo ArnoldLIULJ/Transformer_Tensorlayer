@@ -51,7 +51,7 @@ class MultiHeadAttentionLayer(tl.models.Model):
       self.group_attention_layer.append(
         tl.layers.Conv1d(n_filter=hidden_size, 
         filter_size=i, 
-        stride=i, 
+        stride=1, 
         padding='VALID', 
         in_channels=hidden_size)
       )
@@ -152,7 +152,7 @@ class MultiHeadAttentionLayer(tl.models.Model):
       # print(logits.shape)
 
       # print(logits.shape, bias.shape)
-      logits += bias[:,:,:,self.grouped_size[i]-1::self.grouped_size[i]]
+      logits += bias[:,:,:,self.grouped_size[i]-1:]
       weights = tf.nn.softmax(logits, name="attention_weights") #(Batch, num_head, length_q, length_k)
 
       if self.is_train:

@@ -93,9 +93,9 @@ class TuckerDecomposition_FeedForwardNetwork(tl.layers.Layer):
       relu_dropout: float, dropout rate for training.
     """
     super(TuckerDecomposition_FeedForwardNetwork, self).__init__()
-    self.I2 = hidden_size
-    self.I1 = filter_size
-    self.R1 = R1
+    self.I2 = hidden_size #512
+    self.I1 = filter_size #2048
+    self.R1 = R1 
     self.R2 = R2
     self.relu_dropout = relu_dropout
     

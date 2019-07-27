@@ -420,7 +420,7 @@ class DecoderStack(tl.models.Model):
       self_attention_layer = SelfAttentionLayer(
           params.num_heads, params.hidden_size, 
           params.keep_prob)
-      enc_dec_attention_layer = GroupedAttentionLayer(
+      enc_dec_attention_layer = MultiHeadAttentionLayer(
           params.num_heads, params.hidden_size, 
           params.keep_prob)
       feed_forward_network = FeedForwardLayer(

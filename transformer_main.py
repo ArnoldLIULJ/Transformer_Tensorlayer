@@ -8,7 +8,7 @@ from v2.transformer import Transformer
 from utils.pipeline_dataset import train_input_fn
 from utils import metrics
 from models import optimizer
-
+from v2.translate import translate_file
 
 class CustomSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
   def __init__(self, d_model, warmup_steps=5):
@@ -27,8 +27,10 @@ class CustomSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
 
 def train_model(input_params):
     params = models_params.BASE_PARAMS
-
-    
+    subtokenizer = tokenizer.Subtokenizer("data/data/"+VOCAB_FILE)
+    input_file = "data/raw/dev/newstest2013.en"
+    output_file = "./output/dev.de"
+    ref_filename = "data/raw/dev/newstest2013.de"
     dataset = train_input_fn(input_params)
 
     
@@ -49,7 +51,7 @@ def train_model(input_params):
 
     
     model = Transformer(params)
-    model.load_weights('./checkpoints/my_checkpoint')
+    # model.load_weights('./checkpoints/my_checkpoint')
 
     learning_rate = CustomSchedule(params["hidden_size"], warmup_steps=params["learning_rate_warmup_steps"])
     # optimizer = tf.optimizers.Adam(learning_rate=0.001)
@@ -64,8 +66,20 @@ def train_model(input_params):
             loss = train_step(inputs, targets)
             if (i % 100 == 0):
                 print('Batch ID {} at Epoch [{}/{}]: loss {:.4f}'.format(i, epoch + 1, num_epochs, loss))
-            if ((i+1) % 3000 == 0):
+            if ((i+1) % 2000 == 0):
                 model.save_weights('./checkpoints/my_checkpoint')
+
+            if (i == 80000):
+                translate_file(model, subtokenizer, input_file=input_file, output_file=output_file)
+                try:
+                    insensitive_score = bleu_wrapper(ref_filename, output_file, False)
+                    sensitive_score = bleu_wrapper(ref_filename, output_file, True)
+                    with tf.io.gfile.GFile(trace_path+"bleu_insensitive", "ab+") as trace_file:
+                        trace_file.write(str(insensitive_score)+'\n')
+                    with tf.io.gfile.GFile(trace_path+"bleu_sensitive", "ab+") as trace_file:
+                        trace_file.write(str(sensitive_score)+'\n')
+                except:
+                    print("An exception occurred")
             total_loss += loss
             n_iter += 1
 
