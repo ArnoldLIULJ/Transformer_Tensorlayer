@@ -36,6 +36,7 @@ def train_model(input_params):
     input_file = "data/raw/dev/newstest2013.en"
     output_file = "./output/dev.de"
     ref_filename = "data/raw/dev/newstest2013.de"
+    trace_path = "checkpoints/logging/"
     dataset = train_input_fn(input_params)
 
     
@@ -73,7 +74,8 @@ def train_model(input_params):
                 print('Batch ID {} at Epoch [{}/{}]: loss {:.4f}'.format(i, epoch + 1, num_epochs, loss))
             if ((i+1) % 2000 == 0):
                 model.save_weights('./checkpoints/my_checkpoint')
-
+            with tf.io.gfile.GFile(trace_path+"loss", "ab+") as trace_file:
+                trace_file.write(str(loss.numpy())+'\n')
             if (i == 80000):
                 translate_file(model, subtokenizer, input_file=input_file, output_file=output_file)
                 try:
