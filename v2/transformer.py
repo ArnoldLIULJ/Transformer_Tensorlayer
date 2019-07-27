@@ -285,7 +285,6 @@ class Transformer(tf.keras.Model):
 
     return {"outputs": top_decoded_ids, "scores": top_scores}
 
-
 class LayerNormalization(tf.keras.layers.Layer):
   """Applies layer normalization."""
 

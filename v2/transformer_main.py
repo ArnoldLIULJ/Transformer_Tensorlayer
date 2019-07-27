@@ -30,16 +30,16 @@ from absl import flags
 import tensorflow as tf
 
 # pylint: disable=g-bad-import-order
-from official.transformer import compute_bleu
-from official.transformer.utils import tokenizer
-from official.transformer.v2 import data_pipeline
-from official.transformer.v2 import misc
-from official.transformer.v2 import optimizer
-from official.transformer.v2 import transformer
-from official.transformer.v2 import translate
-from official.utils.flags import core as flags_core
-from official.utils.logs import logger
-from official.utils.misc import distribution_utils
+import compute_bleu
+from utils import tokenizer
+from v2 import data_pipeline
+from v2 import misc
+from v2 import optimizer
+from v2 import transformer
+from v2 import translate
+# from official.utils.flags import core as flags_core
+# from official.utils.logs import logger
+# from official.utils.misc import distribution_utils
 
 
 INF = int(1e9)

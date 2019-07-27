@@ -20,7 +20,7 @@ from __future__ import print_function
 
 import tensorflow as tf
 
-from official.transformer.utils import tokenizer
+from utils import tokenizer
 
 _DECODE_BATCH_SIZE = 32
 _EXTRA_DECODE_LENGTH = 100
