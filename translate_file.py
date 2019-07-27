@@ -107,7 +107,7 @@ def translate_file(
   # in sorted list) to write translations in the original order.
   sorted_inputs, sorted_keys = _get_sorted_inputs(input_file)
   num_decode_batches = (len(sorted_inputs) - 1) // batch_size + 1
-
+  
   def input_generator():
     """Yield encoded strings from sorted_inputs."""
     for i, line in enumerate(sorted_inputs):
@@ -123,7 +123,7 @@ def translate_file(
     return ds
 
   translations = []
-
+  model.eval()
   for i, text in enumerate(input_fn()):
     prediction = model(inputs=text)
     for i, single in enumerate(prediction["outputs"]):
