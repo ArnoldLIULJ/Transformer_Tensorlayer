@@ -9,6 +9,8 @@ from utils.pipeline_dataset import train_input_fn
 from utils import metrics
 from models import optimizer
 from v2.translate import translate_file
+from utils import tokenizer
+from compute_bleu import bleu_wrapper
 
 class CustomSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
   def __init__(self, d_model, warmup_steps=5):
