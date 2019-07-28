@@ -59,7 +59,7 @@ def train_model(input_params):
 
     
     model = Transformer(params)
-    # model.load_weights('./checkpoints/my_checkpoint')
+    model.load_weights('./checkpoints/my_checkpoint')
 
     learning_rate = CustomSchedule(params["hidden_size"], warmup_steps=params["learning_rate_warmup_steps"])
     # optimizer = tf.optimizers.Adam(learning_rate=0.001)
