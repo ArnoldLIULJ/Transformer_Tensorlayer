@@ -67,14 +67,14 @@ def train_model(input_params):
                                      epsilon=1e-9)
 
     
-    
+    time_ = time.time()
     for epoch in range(num_epochs):
         total_loss, n_iter = 0, 0
         for i, [inputs, targets] in enumerate(dataset):
             loss = train_step(inputs, targets)
             if (i % 100 == 0):
-                t = time.time()
-                print('Batch ID {} at Epoch [{}/{}]: loss {:.4f}, time = {}'.format(i, epoch + 1, num_epochs, loss, time.time()-t))
+                print('Batch ID {} at Epoch [{}/{}]: loss {:.4f}, time = {}'.format(i, epoch + 1, num_epochs, loss, (time.time()-time_)/100))
+                time_ = time.time()
             if ((i+1) % 2000 == 0):
                 model.save_weights('./checkpoints/my_checkpoint')
             with tf.io.gfile.GFile(trace_path+"loss", "ab+") as trace_file:
