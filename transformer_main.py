@@ -11,6 +11,8 @@ from models import optimizer
 from v2.translate import translate_file
 from utils import tokenizer
 from compute_bleu import bleu_wrapper
+import time
+
 _TARGET_VOCAB_SIZE = 32768  # Number of subtokens in the vocabulary list.
 _TARGET_THRESHOLD = 327  # Accept vocabulary if size is within this threshold
 VOCAB_FILE = "vocab.ende.%d" % _TARGET_VOCAB_SIZE
@@ -71,7 +73,8 @@ def train_model(input_params):
         for i, [inputs, targets] in enumerate(dataset):
             loss = train_step(inputs, targets)
             if (i % 100 == 0):
-                print('Batch ID {} at Epoch [{}/{}]: loss {:.4f}'.format(i, epoch + 1, num_epochs, loss))
+                t = time.time()
+                print('Batch ID {} at Epoch [{}/{}]: loss {:.4f}, time = {}'.format(i, epoch + 1, num_epochs, loss, time.time()-t))
             if ((i+1) % 2000 == 0):
                 model.save_weights('./checkpoints/my_checkpoint')
             with tf.io.gfile.GFile(trace_path+"loss", "ab+") as trace_file:
