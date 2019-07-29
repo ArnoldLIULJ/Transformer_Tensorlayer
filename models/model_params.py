@@ -92,8 +92,8 @@ class EXAMPLE_PARAMS_v4(object):
 class EXAMPLE_PARAMS_v5(object):
     vocab_size = 33945
 
-    encoder_num_layers = 3
-    decoder_num_layers = 3
+    encoder_num_layers = 6
+    decoder_num_layers = 6
     hidden_size = 512
     ff_size = 1024
     num_heads = 8

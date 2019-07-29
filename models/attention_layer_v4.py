@@ -55,6 +55,10 @@ class MultiHeadAttentionLayer(tl.models.Model):
         padding='VALID', 
         in_channels=hidden_size)
       )
+
+    self.q_dense_layer = Dense_without_bias(
+          self.hidden_size, in_channels=self.hidden_size, W_init=tf.keras.initializers.get('glorot_uniform'), name="q")
+
     self.output_dense_layer = Dense_without_bias(
       self.hidden_size, in_channels=self.hidden_size, W_init=tf.keras.initializers.get('glorot_uniform'), name="output_transform")
     
@@ -131,11 +135,14 @@ class MultiHeadAttentionLayer(tl.models.Model):
     # values rather than regular attention (which uses a single q, k, v).
     bias = mask
     Batch_size = x.shape[0]
-    
+    x = tf.reshape(x, [-1, x.shape[-1]])
+    x = self.q_dense_layer(x)
+    x = tf.reshape(x, [Batch_size, -1, x.shape[-1]])
 
 
     for i, layer in enumerate(self.group_attention_layer):
       q = x
+
       k = v = layer(y)
 
       # Split q, k, v into heads.
