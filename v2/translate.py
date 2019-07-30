@@ -109,7 +109,7 @@ def translate_file(
 
   translations = []
   for i, text in enumerate(input_generator()):
-    val_outputs, _ = model.predict(text)
+    val_outputs, _ = model([text], training=False)
 
     length = len(val_outputs)
     for j in range(length):

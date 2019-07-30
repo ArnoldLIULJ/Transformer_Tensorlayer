@@ -79,7 +79,7 @@ def train_model(input_params):
                 model.save_weights('./checkpoints/my_checkpoint')
             with tf.io.gfile.GFile(trace_path+"loss", "ab+") as trace_file:
                 trace_file.write(str(loss.numpy())+'\n')
-            if (i == 80000):
+            if (i == 1000):
                 translate_file(model, subtokenizer, input_file=input_file, output_file=output_file)
                 try:
                     insensitive_score = bleu_wrapper(ref_filename, output_file, False)
