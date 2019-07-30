@@ -112,7 +112,6 @@ def translate_file(
   translations = []
   for i, text in enumerate(input_generator()):
     val_outputs= model([text], training=False)["outputs"]
-    print("====", val_outputs)
     length = len(val_outputs)
     for j in range(length):
       translation = _trim_and_decode(val_outputs[j], subtokenizer)
