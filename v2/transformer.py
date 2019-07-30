@@ -121,7 +121,6 @@ class Transformer(tf.keras.Model):
       # Generate output sequence if targets is None, or return logits if target
       # sequence is known.
       if targets is None:
-        
         return self.predict(encoder_outputs, attention_bias, training)
       else:
         logits = self.decode(targets, encoder_outputs, attention_bias, training)
@@ -283,7 +282,6 @@ class Transformer(tf.keras.Model):
     # Get the top sequence for each batch element
     top_decoded_ids = decoded_ids[:, 0, 1:]
     top_scores = scores[:, 0]
-    print({"outputs": top_decoded_ids, "scores": top_scores})
     return {"outputs": top_decoded_ids, "scores": top_scores}
 
 class LayerNormalization(tf.keras.layers.Layer):
