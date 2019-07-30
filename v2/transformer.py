@@ -196,6 +196,7 @@ class Transformer(tf.keras.Model):
           attention_bias,
           training=training)
       logits = self.embedding_softmax_layer(outputs, mode="linear")
+      print(logits)
       return logits
 
   def _get_symbols_to_logits_fn(self, max_decode_length, training):
