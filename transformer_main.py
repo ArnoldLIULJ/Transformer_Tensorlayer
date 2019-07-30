@@ -2,14 +2,13 @@ import tensorflow as tf
 import tensorlayer as tl
 import numpy as np
 import argparse
-from utils.tokenizer import *
+from v2.tokenizer import *
 from v2 import models_params
 from v2.transformer import Transformer
 from utils.pipeline_dataset import train_input_fn
 from utils import metrics
 from models import optimizer
 from v2.translate import translate_file
-from utils import tokenizer
 from compute_bleu import bleu_wrapper
 import time
 
@@ -79,7 +78,7 @@ def train_model(input_params):
                 model.save_weights('./checkpoints/my_checkpoint')
             with tf.io.gfile.GFile(trace_path+"loss", "ab+") as trace_file:
                 trace_file.write(str(loss.numpy())+'\n')
-            if (i == 1000):
+            if (i == 100):
                 translate_file(model, subtokenizer, input_file=input_file, output_file=output_file)
                 try:
                     insensitive_score = bleu_wrapper(ref_filename, output_file, False)
