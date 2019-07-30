@@ -151,7 +151,7 @@ class Subtokenizer(object):
       # Note that list(subtokens) converts subtokens to a python list, but the
       # items remain as np.int32. This converts both the array and its items.
       subtokens = subtokens.tolist()
-
+    subtokens = list(subtokens)
     if not subtokens:
       return ""
 

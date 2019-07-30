@@ -35,7 +35,7 @@ class CustomSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
 def train_model(input_params):
     params = models_params.BASE_PARAMS
     subtokenizer = tokenizer.Subtokenizer("data/data/"+VOCAB_FILE)
-    input_file = "data/raw/dev/newstest2013.en"
+    input_file = "README.md"
     output_file = "./output/dev.de"
     ref_filename = "data/raw/dev/newstest2013.de"
     trace_path = "checkpoints/logging/"
@@ -71,14 +71,14 @@ def train_model(input_params):
     for epoch in range(num_epochs):
         total_loss, n_iter = 0, 0
         for i, [inputs, targets] in enumerate(dataset):
-            loss = train_step(inputs, targets)
-            if (i % 100 == 0):
-                print('Batch ID {} at Epoch [{}/{}]: loss {:.4f}, time = {}'.format(i, epoch + 1, num_epochs, loss, (time.time()-time_)/100))
-                time_ = time.time()
-            if ((i+1) % 2000 == 0):
-                model.save_weights('./checkpoints/my_checkpoint')
-            with tf.io.gfile.GFile(trace_path+"loss", "ab+") as trace_file:
-                trace_file.write(str(loss.numpy())+'\n')
+            # loss = train_step(inputs, targets)
+            # if (i % 100 == 0):
+            #     print('Batch ID {} at Epoch [{}/{}]: loss {:.4f}, time = {}'.format(i, epoch + 1, num_epochs, loss, (time.time()-time_)/100))
+            #     time_ = time.time()
+            # if ((i+1) % 2000 == 0):
+            #     model.save_weights('./checkpoints/my_checkpoint')
+            # with tf.io.gfile.GFile(trace_path+"loss", "ab+") as trace_file:
+            #     trace_file.write(str(loss.numpy())+'\n')
             if (i == 0):
                 translate_file(model, subtokenizer, input_file=input_file, output_file=output_file)
                 try:
@@ -113,6 +113,6 @@ if __name__ == '__main__':
     params["static_batch"] = False
     params["num_gpus"] = 1
     params["use_synthetic_data"] = False
-    params["data_dir"] = './data/data/wmt32k-train*'
+    params["data_dir"] = './data/data/wmt32k-train-00001*'
     # wmt_dataset.download_and_preprocess_dataset('data/raw', 'data', search=False)
     train_model(params)
