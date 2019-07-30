@@ -147,13 +147,15 @@ class Subtokenizer(object):
 
   def decode(self, subtokens):
     """Converts list of int subtokens ids into a string."""
+    subtokens = subtokens.numpy()
     if isinstance(subtokens, np.ndarray):
       # Note that list(subtokens) converts subtokens to a python list, but the
       # items remain as np.int32. This converts both the array and its items.
       subtokens = subtokens.tolist()
-    if not subtokens:
-      return ""
-
+    
+    # if not subtokens:
+    #   return ""
+    
     assert isinstance(subtokens, list) and isinstance(subtokens[0], int), (
         "Subtokens argument passed into decode() must be a list of integers.")
 

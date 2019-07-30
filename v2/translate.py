@@ -62,7 +62,6 @@ def _encode_and_add_eos(line, subtokenizer):
 def _trim_and_decode(ids, subtokenizer):
   """Trim EOS and PAD tokens from ids, and decode to return a string."""
   try:
-    print("====", ids)
     index = list(ids).index(tokenizer.EOS_ID)
     
     return subtokenizer.decode(ids[:index])
