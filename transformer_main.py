@@ -35,7 +35,7 @@ class CustomSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
 def train_model(input_params):
     params = models_params.BASE_PARAMS
     subtokenizer = tokenizer.Subtokenizer("data/data/"+VOCAB_FILE)
-    input_file = "README.md"
+    input_file = "data/raw/dev/newstest2013.en"
     output_file = "./output/dev.de"
     ref_filename = "data/raw/dev/newstest2013.de"
     trace_path = "checkpoints/logging/"
