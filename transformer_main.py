@@ -36,7 +36,7 @@ def train_model(input_params):
     params = models_params.BASE_PARAMS
     subtokenizer = tokenizer.Subtokenizer("data/data/"+VOCAB_FILE)
     input_file = "data/raw/dev/newstest2013.en"
-    output_file = "./output/dev.de"
+    output_file = "./output/dev_tf.de"
     ref_filename = "data/raw/dev/newstest2013.de"
     trace_path = "checkpoints/logging/"
     dataset = train_input_fn(input_params)
@@ -59,7 +59,7 @@ def train_model(input_params):
 
     
     model = Transformer(params)
-    model.load_weights('./checkpoints/my_checkpoint')
+    # model.load_weights('./checkpoints/my_checkpoint')
 
     learning_rate = CustomSchedule(params["hidden_size"], warmup_steps=params["learning_rate_warmup_steps"])
     # optimizer = tf.optimizers.Adam(learning_rate=0.001)
@@ -79,7 +79,7 @@ def train_model(input_params):
                 model.save_weights('./checkpoints/my_checkpoint')
             with tf.io.gfile.GFile(trace_path+"loss", "ab+") as trace_file:
                 trace_file.write(str(loss.numpy())+'\n')
-            if (i == 0):
+            if (i == 5000):
                 translate_file(model, subtokenizer, input_file=input_file, output_file=output_file)
                 try:
                     insensitive_score = bleu_wrapper(ref_filename, output_file, False)
