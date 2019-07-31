@@ -40,10 +40,9 @@ def train_model(input_params):
     params = model_params.EXAMPLE_PARAMS
     dataset = train_input_fn(input_params)
     subtokenizer = tokenizer.Subtokenizer("data/data/"+VOCAB_FILE)
-    input_file = "data/data/newstest2013.en"
-    output_file = "./output/dev_task.de"
-
-    ref_filename = "data/data/newstest2013.de"
+    input_file = "data/raw/dev/newstest2013.en"
+    output_file = "./output/dev.de"
+    ref_filename = "data/raw/dev/newstest2013.de"
     trace_path = "task/logging/"
     num_epochs = 10
     
