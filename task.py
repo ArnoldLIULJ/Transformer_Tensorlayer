@@ -82,7 +82,7 @@ def train_model(input_params):
                 time_ = time.time()            
             if ((i+1) % 2000 == 0):
                 tl.files.save_npz(model.all_weights, name='./task/model.npz')
-            if (i == 80000):
+            if (i == 5000):
                 translate_file(model, subtokenizer, input_file=input_file, output_file=output_file)
                 try:
                     insensitive_score = bleu_wrapper(ref_filename, output_file, False)
