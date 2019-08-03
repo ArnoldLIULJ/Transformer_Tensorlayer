@@ -147,20 +147,37 @@ class Subtokenizer(object):
 
   def decode(self, subtokens):
     """Converts list of int subtokens ids into a string."""
-    subtokens = subtokens.numpy()
     if isinstance(subtokens, np.ndarray):
-      # Note that list(subtokens) converts subtokens to a python list, but the
-      # items remain as np.int32. This converts both the array and its items.
-      subtokens = subtokens.tolist()
-    
-    # if not subtokens:
-    #   return ""
-    
-    assert isinstance(subtokens, list) and isinstance(subtokens[0], int), (
-        "Subtokens argument passed into decode() must be a list of integers.")
+        # Note that list(subtokens) converts subtokens to a python list, but the
+        # items remain as np.int32. This converts both the array and its items.
+        subtokens = subtokens.tolist()
 
-    return _unicode_to_native(
-        _join_tokens_to_string(self._subtoken_ids_to_tokens(subtokens)))
+    if not subtokens.numpy().any():
+        return ""
+    
+    subtokens = list(subtokens.numpy())
+    # print(type(subtokens), type(subtokens[0]))
+    # assert isinstance(subtokens, list) and isinstance(subtokens[0], int), (
+    #     "Subtokens argument passed into decode() must be a list of integers.")
+
+    return _join_tokens_to_string(self._subtoken_ids_to_tokens(subtokens))
+
+#   def decode(self, subtokens):
+#     """Converts list of int subtokens ids into a string."""
+#     subtokens = subtokens.numpy()
+#     if isinstance(subtokens, np.ndarray):
+#       # Note that list(subtokens) converts subtokens to a python list, but the
+#       # items remain as np.int32. This converts both the array and its items.
+#       subtokens = subtokens.tolist()
+    
+#     # if not subtokens:
+#     #   return ""
+    
+#     assert isinstance(subtokens, list) and isinstance(subtokens[0], int), (
+#         "Subtokens argument passed into decode() must be a list of integers.")
+
+#     return _unicode_to_native(
+#         _join_tokens_to_string(self._subtoken_ids_to_tokens(subtokens)))
 
   def _subtoken_ids_to_tokens(self, subtokens):
     """Convert list of int subtoken ids to a list of string tokens."""
