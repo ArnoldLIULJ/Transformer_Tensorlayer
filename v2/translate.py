@@ -62,8 +62,7 @@ def _encode_and_add_eos(line, subtokenizer):
 def _trim_and_decode(ids, subtokenizer):
   """Trim EOS and PAD tokens from ids, and decode to return a string."""
   try:
-    index = list(ids).index(tokenizer.EOS_ID)
-    
+    index = list(ids.numpy()).index(tokenizer.EOS_ID)
     return subtokenizer.decode(ids[:index])
   except ValueError:  # No EOS found in sequence
     return subtokenizer.decode(ids)
