@@ -73,7 +73,7 @@ def train_model(input_params):
         for i, [inputs, targets] in enumerate(dataset):
             loss = train_step(inputs, targets)
             if (i % 100 == 0):
-                print('Batch ID {} at Epoch [{}/{}]: loss {:.4f}, time = {}'.format(i, epoch + 1, num_epochs, loss, (time.time()-time_)/100))
+                print('Batch ID {} at Epoch [{}/{}]: loss {:.4f}, time = {}'.format(i, epoch + 3, num_epochs, loss, (time.time()-time_)/100))
                 time_ = time.time()
             if ((i+1) % 2000 == 0):
                 model.save_weights('./checkpoints/my_checkpoint')
