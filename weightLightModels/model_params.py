@@ -28,16 +28,16 @@ class EXAMPLE_PARAMS(object):
     vocab_size = 33945
 
     filter_number = 256
-    n_units = 1024
+    n_units = 256
     H = 4
 
-    light_filter_size=(1,8)
+    light_filter_size=(1,3)
     filter_size = light_filter_size[-1]
-    encoder_num_layers = 2
-    decoder_num_layers = 2
+    encoder_num_layers = 6
+    decoder_num_layers = 6
 
-    hidden_size = 256
-    ff_size = 512
+    hidden_size = 512
+    ff_size = 2048
     num_heads = 8
     keep_prob = 0.8
 

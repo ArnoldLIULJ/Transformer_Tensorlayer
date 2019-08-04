@@ -14,14 +14,14 @@ class GLU(tl.models.Model):
             padding='VALID',
             in_channels=params.n_units
         )
-        self.add_bias_layer = addBias(
-            in_channels=params.filter_number
-        )
+        # self.add_bias_layer = addBias(
+        #     in_channels=params.filter_number
+        # )
         
 
     def forward(self, inputs):
         inputs = self.conv_layer(inputs)
-        inputs = self.add_bias_layer(inputs)
+        # inputs = self.add_bias_layer(inputs)
         A = inputs[:,:,:inputs.shape[-1]//2]
         B = inputs[:,:,inputs.shape[-1]//2:]
         inputs = A * tf.nn.sigmoid(B)

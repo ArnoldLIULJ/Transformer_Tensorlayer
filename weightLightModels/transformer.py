@@ -24,7 +24,7 @@ from __future__ import print_function
 import tensorflow as tf
 import tensorlayer as tl
 from models import embedding_layer_v2 as embedding_layer
-from models.attention_layer_v3 import SelfAttentionLayer, MultiHeadAttentionLayer
+from models.attention_layer_v2 import SelfAttentionLayer, MultiHeadAttentionLayer
 from weightLightModels.LightWeightConvolution import LightConv
 from models.feedforward_layer_v3 import FeedForwardNetwork as FeedForwardLayer
 from models.model_utils_v2 import get_position_encoding as positional_encoding
