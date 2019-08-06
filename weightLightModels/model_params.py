@@ -29,7 +29,7 @@ class EXAMPLE_PARAMS(object):
 
     filter_number = 256
     n_units = 256
-    H = 4
+    H = 128
 
     light_filter_size=(1,3)
     filter_size = light_filter_size[-1]
