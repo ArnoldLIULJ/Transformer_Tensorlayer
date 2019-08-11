@@ -40,18 +40,17 @@ def train_model(input_params):
     params = model_params.EXAMPLE_PARAMS_v4
     dataset = train_input_fn(input_params)
     subtokenizer = tokenizer.Subtokenizer("data/data/"+VOCAB_FILE)
-    input_file = "README.md"
+    input_file = "data/raw/dev/newstest2013.en"
     output_file = "./output/dev.de"
 
     ref_filename = "data/raw/dev/newstest2013.de"
-    trace_path = "checkpoints_v4/logging/"
+    trace_path = "checkpoints_seq2seq/logging/"
     num_epochs = 10
     
 
     def train_step(inputs, targets):
         model.train()
         with tf.GradientTape() as tape:
-            #print(inputs)
             decoder_inputs = tf.pad(targets,
                                 [[0, 0], [1, 0]])[:, :-1]
             print(inputs.shape, decoder_inputs.shape)
@@ -70,7 +69,7 @@ def train_model(input_params):
             embedding_layer=tl.layers.Embedding(vocabulary_size=33945,
                                                 embedding_size=1024), method='dot'
         )
-    # load_weights = tl.files.load_npz(name='./checkpoints_v4/model.npz')
+    # load_weights = tl.files.load_npz(name='./checkpoints_seq2seq/model.npz')
     # tl.files.assign_weights(load_weights, model)
     learning_rate = CustomSchedule(params.hidden_size, warmup_steps=params.learning_rate_warmup_steps)
     optimizer_ = optimizer.LazyAdam(learning_rate, beta_1=0.9, beta_2=0.98, epsilon=1e-9)
@@ -79,14 +78,14 @@ def train_model(input_params):
     for epoch in range(num_epochs):
         total_loss, n_iter = 0, 0
         for i, [inputs, targets] in enumerate(dataset):
-            # loss = train_step(inputs, targets)
-            # with tf.io.gfile.GFile(trace_path+"loss", "ab+") as trace_file:
-            #     trace_file.write(str(loss.numpy())+'\n')
-            # if (i % 100 == 0):
-            #     print('Batch ID {} at Epoch [{}/{}]: loss {:.4f} using {:.4f}'.format(i, epoch + 1, num_epochs, loss, (time.time()-time_)/100))
-            #     time_ = time.time()
-            # if (i % 2000 == 0):
-            #     tl.files.save_npz(model.all_weights, name='./checkpoints_v4/model.npz')
+            loss = train_step(inputs, targets)
+            with tf.io.gfile.GFile(trace_path+"loss", "ab+") as trace_file:
+                trace_file.write(str(loss.numpy())+'\n')
+            if (i % 100 == 0):
+                print('Batch ID {} at Epoch [{}/{}]: loss {:.4f} using {:.4f}'.format(i, epoch + 1, num_epochs, loss, (time.time()-time_)/100))
+                time_ = time.time()
+            if (i % 2000 == 0):
+                tl.files.save_npz(model.all_weights, name='./checkpoints_seq2seq/model.npz')
             if (i == 0):
                 translate_file(model, subtokenizer, input_file=input_file, output_file=output_file)
                 try:
@@ -105,7 +104,7 @@ def train_model(input_params):
         # printing average loss after every epoch
         print('Epoch [{}/{}]: loss {:.4f}'.format(epoch + 1, num_epochs, total_loss / n_iter))
         # save model weights after every epoch
-        tl.files.save_npz(model.all_weights, name='./checkpoints_seq/model.npz')
+        tl.files.save_npz(model.all_weights, name='./checkpoints_seq2seq/model.npz')
 
 
 
@@ -122,5 +121,5 @@ if __name__ == '__main__':
     params["static_batch"] = False
     params["num_gpus"] = 2
     params["use_synthetic_data"] = False
-    params["data_dir"] = './data/data/wmt32k-train-00001*'
+    params["data_dir"] = './data/data/wmt32k-train*'
     train_model(params)
