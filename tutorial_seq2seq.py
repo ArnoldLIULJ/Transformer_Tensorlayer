@@ -64,9 +64,9 @@ def train_model(input_params):
 
     
     model = Seq2seqLuongAttention(
-            hidden_size=1024, cell=tf.keras.layers.GRUCell,
+            hidden_size=512, cell=tf.keras.layers.GRUCell,
             embedding_layer=tl.layers.Embedding(vocabulary_size=33945,
-                                                embedding_size=1024), method='dot'
+                                                embedding_size=512), method='dot'
         )
     # load_weights = tl.files.load_npz(name='./checkpoints_seq2seq/model.npz')
     # tl.files.assign_weights(load_weights, model)
