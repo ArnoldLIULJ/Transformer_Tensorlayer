@@ -86,7 +86,7 @@ def train_model(input_params):
                 time_ = time.time()
             if (i % 2000 == 0):
                 tl.files.save_npz(model.all_weights, name='./checkpoints_seq2seq/model.npz')
-            if (i == 0):
+            if (i == 5000):
                 translate_file(model, subtokenizer, input_file=input_file, output_file=output_file)
                 try:
                     insensitive_score = bleu_wrapper(ref_filename, output_file, False)
