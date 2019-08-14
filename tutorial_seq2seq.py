@@ -53,7 +53,6 @@ def train_model(input_params):
         with tf.GradientTape() as tape:
             decoder_inputs = tf.pad(targets,
                                 [[0, 0], [1, 0]])[:, :-1]
-            print(inputs.shape, decoder_inputs.shape)
             logits = model(inputs=[inputs, decoder_inputs])
             logits = metrics.MetricLayer(params.vocab_size)([logits, targets])
             logits, loss = metrics.LossLayer(params.vocab_size, 0.1)([logits, targets])
