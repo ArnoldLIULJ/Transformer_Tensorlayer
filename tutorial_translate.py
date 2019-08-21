@@ -152,7 +152,7 @@ if __name__ == "__main__":
     params = model_params.EXAMPLE_PARAMS
     params.beam_size = 1
     model = Transformer(params)
-    load_weights = tl.files.load_npz(name='./checkpoints_tl/model.npz')
+    load_weights = tl.files.load_npz(name='./task/model.npz')
     tl.files.assign_weights(load_weights, model)
     input_file = "./data/raw/dev/newstest2014.en"
     translate_file(model, subtokenizer, input_file, output_file="./output/out_tl.de")
