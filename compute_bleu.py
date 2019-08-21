@@ -115,10 +115,10 @@ def main(unused_argv):
 def define_compute_bleu_flags():
   """Add flags for computing BLEU score."""
   flags.DEFINE_string(
-      name="translation", default="./output/out.de", help=None)
+      name="translation", default="./output/out_tl.de", help=None)
 
   flags.DEFINE_string(
-      name="reference", default="./data/raw/dev/newstest2013.de", help=None)
+      name="reference", default="./data/raw/dev/newstest2014.de", help=None)
 
   flags.DEFINE_enum(
       name="bleu_variant", short_name="bv", default="both",

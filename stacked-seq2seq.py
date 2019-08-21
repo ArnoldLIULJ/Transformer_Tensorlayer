@@ -18,7 +18,16 @@ class Encoder(Layer):
         self.cell = cell(hidden_size)
         self.hidden_size = hidden_size
         self.embedding_layer = embedding_layer
-        self.build((None, None, self.embedding_layer.embedding_size))
+        self.layer_1 = tl.layers.RNN(
+                        cell=cell(units=hidden_size), in_channels=self.embedding_layer.embedding_size, return_last_state=True
+                    )
+        self.layer_2 = tl.layers.RNN(
+                        cell=cell(units=hidden_size), in_channels=hidden_size, return_last_state=True
+                    )
+        self.layer_3 = tl.layers.RNN(
+                        cell=cell(units=hidden_size), in_channels=hidden_size, return_last_state=True
+                    )
+        self.build((None, None, self.hidden_size))
         self._built = True
 
     def build(self, inputs_shape):
@@ -35,12 +44,20 @@ class Encoder(Layer):
         states = initial_state if initial_state is not None else self.cell.get_initial_state(src_seq)
         encoding_hidden_states = list()
         total_steps = src_seq.get_shape().as_list()[1]
+        stacked_states = [None for i in range(4)]
+        
+        src_seq, stacked_states[0] = self.layer_1(src_seq, return_state=True)
+        src_seq, stacked_states[1] = self.layer_2(src_seq, return_state=True)
+        src_seq, stacked_states[2] = self.layer_3(src_seq, return_state=True)
+
         for time_step in range(total_steps):
             if not isinstance(states, list):
                 states = [states]
             output, states = self.cell.call(src_seq[:, time_step, :], states, training=self.is_train)
             encoding_hidden_states.append(states[0])
-        return output, encoding_hidden_states, states[0]
+        stacked_states[-1] = states[0]
+        
+        return output, encoding_hidden_states, stacked_states
 
 
 class Decoder_Attention(Layer):
@@ -51,8 +68,19 @@ class Decoder_Attention(Layer):
         self.hidden_size = hidden_size
         self.embedding_layer = embedding_layer
         self.method = method
+        
+        self.layer_1 = tl.layers.RNN(
+                        cell=cell(units=hidden_size), in_channels=hidden_size, return_last_state=True
+                    )
+        self.layer_2 = tl.layers.RNN(
+                        cell=cell(units=hidden_size), in_channels=hidden_size, return_last_state=True
+                    )
+        self.layer_3 = tl.layers.RNN(
+                        cell=cell(units=hidden_size), in_channels=hidden_size, return_last_state=True
+                    )
         self.build((None, hidden_size + self.embedding_layer.embedding_size))
         self._built = True
+
 
     def build(self, inputs_shape):
         self.cell.build(input_shape=tuple(inputs_shape))
@@ -69,7 +97,9 @@ class Decoder_Attention(Layer):
             self._trainable_weights.append(var)
 
     def score(self, encoding_hidden, hidden, method):
-        # encoding = [B, T, H], hidden = [B, H], combined = [B,T,2H]
+        # encoding = [B, T, H]
+        # hidden = [B, H]
+        # combined = [B,T,2H]
         if method is "concat":
             # hidden = [B,H]->[B,1,H]->[B,T,H]
             hidden = tf.expand_dims(hidden, 1)
@@ -97,13 +127,16 @@ class Decoder_Attention(Layer):
         score = tf.nn.softmax(score, axis=-1)  # score = [B,T]
         return score
 
-    def forward(self, dec_seq, enc_hiddens, last_hidden, method, return_last_state=False):
+    def forward(self, dec_seq, enc_hiddens, layer_states, method, return_last_state=False):
         # dec_seq = [B, T_, V], enc_hiddens = [B, T, H], last_hidden = [B, H]
         total_steps = dec_seq.get_shape().as_list()[1]
-        states = last_hidden
+        last_hidden = layer_states[0][0]
+        states = layer_states[0]
         cell_outputs = list()
         for time_step in range(total_steps):
+            # print(enc_hiddens.shape, last_hidden.shape)
             attention_weights = self.score(enc_hiddens, last_hidden, method)
+            
             attention_weights = tf.expand_dims(attention_weights, 1)  #[B, 1, T]
             context = tf.matmul(attention_weights, enc_hiddens)  #[B, 1, H]
             context = tf.squeeze(context, 1)  #[B, H]
@@ -114,10 +147,19 @@ class Decoder_Attention(Layer):
             cell_outputs.append(cell_output)
             last_hidden = states[0]
 
+    
+        last_hiddens = [None for i in range(4)]
+        last_hiddens[0] = [last_hidden]
+
         cell_outputs = tf.convert_to_tensor(cell_outputs)
         cell_outputs = tf.transpose(cell_outputs, perm=[1, 0, 2])
+
+        cell_outputs, last_hiddens[1] = self.layer_1(cell_outputs, initial_state=layer_states[1])
+        cell_outputs, last_hiddens[2] = self.layer_2(cell_outputs, initial_state=layer_states[2])
+        cell_outputs, last_hiddens[3] = self.layer_3(cell_outputs, initial_state=layer_states[3])
+
         if (return_last_state):
-            return cell_outputs, last_hidden
+            return cell_outputs, last_hiddens
         return cell_outputs
 
 
@@ -174,7 +216,7 @@ class Seq2seqLuongAttention(Model):
             dec_output, last_hidden_states = self.dec_layer(
                 dec_output, encoding_hidden_states, last_hidden_states, method=self.method, return_last_state=True
             )
-            
+            # print(last_hidden_states[0].shape)
             dec_output = tf.reshape(dec_output, [-1, dec_output.shape[-1]])
             dec_output = self.dense_layer(dec_output)
             dec_output = tf.reshape(dec_output, [batch_size, -1, dec_output.shape[-1]])
@@ -190,7 +232,7 @@ class Seq2seqLuongAttention(Model):
         enc_output, encoding_hidden_states, last_hidden_states = self.enc_layer(src_seq)
         encoding_hidden_states = tf.convert_to_tensor(encoding_hidden_states)
         encoding_hidden_states = tf.transpose(encoding_hidden_states, perm=[1, 0, 2])
-        last_hidden_states = tf.convert_to_tensor(last_hidden_states)
+        # last_hidden_states = tf.convert_to_tensor(last_hidden_states)
 
         if (self.is_train):
             dec_seq = inputs[1]

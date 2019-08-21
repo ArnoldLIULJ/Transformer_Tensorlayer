@@ -150,32 +150,26 @@ if __name__ == "__main__":
 
   if (len(sys.argv) > 1 and sys.argv[1] == "tl"):
     params = model_params.EXAMPLE_PARAMS
+    params.beam_size = 1
     model = Transformer(params)
     load_weights = tl.files.load_npz(name='./checkpoints_tl/model.npz')
     tl.files.assign_weights(load_weights, model)
-    input_file = "./data/raw/dev/newstest2013.en"
-  elif (sys.argv[1] == "task2013"):
-    params = model_params.EXAMPLE_PARAMS
-    model = Transformer(params)
-    load_weights = tl.files.load_npz(name='./task/model.npz')
-    tl.files.assign_weights(load_weights, model)
-    input_file = "./data/raw/dev/newstest2013.en"
+    input_file = "./data/raw/dev/newstest2014.en"
+    translate_file(model, subtokenizer, input_file, output_file="./output/out_tl.de")
 
-  elif (sys.argv[1] == "task2014"):
+
+  if (len(sys.argv) > 1 and sys.argv[1] == "n-gram"):
     params = model_params.EXAMPLE_PARAMS
+    params.beam_size = 1
     model = Transformer(params)
-    load_weights = tl.files.load_npz(name='./task/model.npz')
+    load_weights = tl.files.load_npz(name='./checkpoints_v5/model.npz')
     tl.files.assign_weights(load_weights, model)
     input_file = "./data/raw/dev/newstest2014.en"
+    translate_file(model, subtokenizer, input_file, output_file="./output/out_v5.de")
 
-  else:
-    params = model_params_dw.EXAMPLE_PARAMS
-    model = Transformer_DW(params)
-    load_weights = tl.files.load_npz(name='./checkpoints_dw/model.npz')
-    tl.files.assign_weights(load_weights, model)
-    input_file = "./data/data/newstest2013.en"
 
-  translate_file(model, subtokenizer, input_file, output_file="./output/out.de")
+
+  
 
 
     
