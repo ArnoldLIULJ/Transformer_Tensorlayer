@@ -154,7 +154,7 @@ if __name__ == "__main__":
     model = Transformer(params)
     load_weights = tl.files.load_npz(name='./task/model.npz')
     tl.files.assign_weights(load_weights, model)
-    input_file = "./data/raw/dev/newstest2014.en"
+    input_file = "./data/data//newstest2014.en"
     translate_file(model, subtokenizer, input_file, output_file="./output/out_tl.de")
 
 
@@ -164,7 +164,7 @@ if __name__ == "__main__":
     model = Transformer(params)
     load_weights = tl.files.load_npz(name='./checkpoints_v5/model.npz')
     tl.files.assign_weights(load_weights, model)
-    input_file = "./data/raw/dev/newstest2014.en"
+    input_file = "./data/data/newstest2014.en"
     translate_file(model, subtokenizer, input_file, output_file="./output/out_v5.de")
 
 
