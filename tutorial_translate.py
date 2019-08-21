@@ -32,6 +32,7 @@ from utils import tokenizer
 from models import model_params
 from weightLightModels import model_params as model_params_dw
 from models.transformer_v2 import Transformer
+from models.transformer_v5 import Transformer as Transformer_ngram
 from weightLightModels.transformer import Transformer as Transformer_DW
 _DECODE_BATCH_SIZE = 32
 _EXTRA_DECODE_LENGTH = 100
@@ -161,7 +162,7 @@ if __name__ == "__main__":
   if (len(sys.argv) > 1 and sys.argv[1] == "n-gram"):
     params = model_params.EXAMPLE_PARAMS_v5
     params.beam_size = 1
-    model = Transformer(params)
+    model = Transformer_ngram(params)
     load_weights = tl.files.load_npz(name='./checkpoints_v5/model.npz')
     tl.files.assign_weights(load_weights, model)
     input_file = "./data/data/newstest2014.en"
