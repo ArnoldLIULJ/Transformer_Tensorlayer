@@ -159,7 +159,7 @@ if __name__ == "__main__":
 
 
   if (len(sys.argv) > 1 and sys.argv[1] == "n-gram"):
-    params = model_params.EXAMPLE_PARAMS
+    params = model_params.EXAMPLE_PARAMS_v5
     params.beam_size = 1
     model = Transformer(params)
     load_weights = tl.files.load_npz(name='./checkpoints_v5/model.npz')
